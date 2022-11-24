@@ -1,0 +1,265 @@
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import resource_find kivy.resources
+#:import MDTextField1 kivy_modified.textfield
+# ^ USING CUSTOM DEFINED TEXTFIELD AS DEFAULT HAS A BUG
+
+#:set btnSize [0.85, 0.08]
+#:set btnX (1-btnSize[0])/2
+
+#:set tInpSize [0.75, 0.07]
+#:set tInpX (1-tInpSize[0])/2
+
+###############
+
+###############
+
+<Widget>:
+    font_size: 50
+
+
+<MDLabel>:
+    color: 0,0,0,1
+
+<MDFillRoundFlatButton>:
+    md_bg_color: 0,0,0,1
+
+<MDTextFieldCustom>:
+    fill_color_normal: 1,1,1,0.3
+    helper_text_color_normal: 0,0,0,1
+    opacity: 1
+    font_size: 60
+
+<BackButton@MDIconButton>:
+    pos_hint: {'x': 0.02, 'y': 0.9 }
+    size_hint: 0.5, 0.05
+    icon: "arrow-left"
+    icon_size: 50
+
+<Background>:
+    canvas:
+        Color:
+            rgba: get_color_from_hex("#3f26fc"+"ff")
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    Image:
+        source: "Images/gradient.png"
+        allow_stretch: True
+        keep_ratio: False
+        size: self.width, self.height
+
+<InitialScreenDecoration>:
+    canvas:
+        Color:
+            rgba:
+                0,0,0,1
+        Rectangle:
+            size: ((self.width * btnSize[0]/2)-40), 2
+            pos: (self.width * btnX), (self.height * 0.314)
+        Rectangle:
+            size: ((self.width * btnSize[0]/2)-40), 2
+            pos: ((self.width * 0.5)+40), (self.height * 0.314)
+
+
+<InitialScreen>:
+
+    FloatLayout:
+
+        canvas:
+            Color:
+                rgba:
+                    0,0,0,1
+            Rectangle:
+                size: (self.width * 0.375), 2
+                pos: (self.width * 0.075), (self.height * 0.314)
+            Rectangle:
+                size: (self.width * 0.375), 2
+                pos: (self.width * 0.55), (self.height * 0.314)
+
+        Background
+        InitialScreenDecoration
+
+        Image:
+            source: "Images/dumbbell.png"
+            pos_hint: {'x': 0.2, 'y': 0.7 }
+            size_hint: 0.6, 0.1
+            allow_stretch: True
+        MDLabel:
+            pos_hint: {'x': 0.05, 'y': 0.55 }
+            size_hint: 0.9, 0.2
+            text: "AI FITNESS"
+            halign: "center"
+            font_size: 100
+            color: 0,0,0,1
+
+        MDLabel:
+            size_hint: 0.9, 0.07
+            pos_hint: {'x': 0.05, 'y': 0.28}
+            text: "OR"
+            halign: "center"
+            font_size: 40
+            color: (0,0,0,1)
+
+        MDFillRoundFlatButton:
+            size_hint: btnSize
+            pos_hint: {'x': btnX, 'y': 0.35}
+            text: "Login"
+            font_size: 50
+            on_release:
+                root.manager.transition.direction = "left"
+                root.manager.current = "login"
+
+        MDFillRoundFlatButton:
+            size_hint: btnSize
+            pos_hint: {'x': btnX, 'y': 0.2}
+            text: "Sign Up"
+            font_size: 50
+            on_release:
+                root.manager.transition.direction = "left"
+                root.manager.current = "signup"
+
+
+<LoginScreen>:
+
+    loginBtn: loginBtn
+    unInput: unInput
+    pwInput: pwInput
+
+    Background
+
+    FloatLayout:
+
+        Image:
+            source: "Images/dumbbell.png"
+            pos_hint: {'x': 0.2, 'y': 0.7 }
+            size_hint: 0.6, 0.1
+            allow_stretch: True
+
+        MDLabel:  # Delete
+            pos_hint: {'x': 0.05, 'y': 0.55 }
+            size_hint: 0.9, 0.2
+            text: ""
+            halign: "center"
+            font_size: 100
+            color: 0,0,0,1
+
+        BackButton:
+            on_release:
+                root.reset_inputs()
+                root.manager.transition.direction = "right"
+                root.manager.current = "initial"
+
+        MDLabel:  # Delete
+            pos_hint: {'x': 0.05, 'y': 0.7 }
+            size_hint: 0.9, 0.2
+            text: ""
+            halign: "left"
+            font_size: 150
+
+        MDFillRoundFlatButton:
+            id: loginBtn
+            size_hint: btnSize
+            pos_hint: {'x': btnX, 'y': 0.2}
+            text: "Login"
+            font_size: 50
+            md_bg_color: 0,0,0,1
+            on_release: root.login()
+
+        MDTextFieldCustom:
+            id: unInput
+            required: True
+            size_hint: tInpSize
+            pos_hint: {'x': tInpX, 'y': 0.5}
+            hint_text: "Username / Email"
+            helper_text_mode: "on_error"
+            mode: "round"
+            icon_left: "account"
+
+        MDTextFieldCustom:
+            id: pwInput
+            required: True
+            size_hint: tInpSize
+            pos_hint: {'x': tInpX, 'y': 0.4}
+            hint_text: "Password"
+            password: True
+            helper_text_mode: "on_error"
+            mode: "round"
+
+
+
+<SignUpScreen>:
+
+    createAccountBtn: createAccountBtn
+    nameInput: nameInput
+    emailInput: emailInput
+    unInput: unInput
+    pwInput: pwInput
+
+    Background
+
+    FloatLayout:
+
+        Image:
+            source: "Images/dumbbell.png"
+            pos_hint: {'x': 0.2, 'y': 0.75 }
+            size_hint: 0.6, 0.1
+            allow_stretch: True
+
+        BackButton:
+            on_release:
+                root.reset_inputs()
+                root.manager.transition.direction = "right"
+                root.manager.current = "initial"
+
+
+        MDLabel:
+            pos_hint: {'x': 0.05, 'y': 0.7 }
+            size_hint: 0.9, 0.2
+            text: ""
+            halign: "left"
+            font_size: 150
+
+        MDFillRoundFlatButton:
+            id: createAccountBtn
+            size_hint: btnSize
+            pos_hint: {'x': btnX, 'y': 0.15}
+            text: "Sign Up"
+            on_release: root.create_account()
+
+        MDTextFieldCustom:
+            id: nameInput
+            required: True
+            size_hint: tInpSize
+            pos_hint: {'x': tInpX, 'y': 0.6}
+            hint_text: "Name"
+            helper_text_mode: "on_error"
+            mode: "round"
+
+        MDTextFieldCustom:
+            id: emailInput
+            required: True
+            size_hint: tInpSize
+            pos_hint: {'x': tInpX, 'y': 0.5}
+            hint_text: "Email"
+            helper_text_mode: "on_error"
+            mode: "round"
+
+        MDTextFieldCustom:
+            id: unInput
+            required: True
+            size_hint: tInpSize
+            pos_hint: {'x': tInpX, 'y': 0.4}
+            hint_text: "Username"
+            helper_text_mode: "on_error"
+            mode: "round"
+
+        MDTextFieldCustom:
+            id: pwInput
+            required: True
+            size_hint: tInpSize
+            pos_hint: {'x': tInpX, 'y': 0.3}
+            hint_text: "Password"
+            password: True
+            helper_text_mode: "on_error"
+            mode: "round"
