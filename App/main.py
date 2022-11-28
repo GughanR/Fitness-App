@@ -54,6 +54,15 @@ class LoginScreen(Screen):
                 widget_object.helper_text = ""
 
 
+class ForgotPasswordScreen(Screen):
+
+    def reset_inputs(self):
+        for widget_name, widget_object in self.ids.items():
+            if "Input" in widget_name:
+                widget_object.text = ""
+                widget_object.helper_text = ""
+
+
 class SignUpScreen(Screen):
     createAccountBtn = ObjectProperty(None)
     nameInput = ObjectProperty(None)
@@ -92,6 +101,7 @@ class FitnessApp(MDApp):
         sm.add_widget(InitialScreen(name="initial"))
         sm.add_widget(SignUpScreen(name="signup"))
         sm.add_widget(LoginScreen(name="login"))
+        sm.add_widget(ForgotPasswordScreen(name="forgot"))
         return sm
 
 

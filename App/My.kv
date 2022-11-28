@@ -188,12 +188,15 @@
             icon_left: "key-variant"
 
         MDFlatButton:
-            size_hint: tInpSize
+            size_hint: 0,0
             pos_hint: {'x': tInpX, 'y': 0.34}
             font_size: 40
             halign: "left"
             text: "[u]Forgot password?[/u]"
             markup: True
+            on_release:
+                root.manager.transition.direction = "left"
+                root.manager.current = "forgot"
 
 
 
@@ -276,3 +279,50 @@
             helper_text_mode: "on_error"
             mode: "round"
             icon_left: "key-variant"
+
+
+<ForgotPasswordScreen>:
+
+    FloatLayout:
+
+        Background
+
+        BackButton:
+            on_release:
+                root.reset_inputs()
+                root.manager.transition.direction = "right"
+                root.manager.current = "login"
+
+        Image:
+            source: "Images/dumbbell.png"
+            pos_hint: {'x': 0.2, 'y': 0.75 }
+            size_hint: 0.6, 0.1
+            allow_stretch: True
+
+        MDLabel:
+            size_hint: tInpSize[0], 0.15
+            pos_hint: {'x': tInpX, 'y': 0.5}
+            text: "A new password will be sent to your email address."
+            md_bg_color: 1,1,1,0.35
+            theme_text_color: "Hint"
+            mode: "round"
+            halign: "center"
+
+        MDFillRoundFlatButton:
+            id: loginBtn
+            size_hint: btnSize
+            pos_hint: {'x': btnX, 'y': 0.2}
+            text: "Reset Password"
+            font_size: 50
+            md_bg_color: 0,0,0,1
+            on_release: root.login()
+
+        MDTextFieldCustom:
+            id: unInput
+            required: True
+            size_hint: tInpSize
+            pos_hint: {'x': tInpX, 'y': 0.35}
+            hint_text: "Email"
+            helper_text_mode: "on_error"
+            mode: "round"
+            icon_left: "email"
