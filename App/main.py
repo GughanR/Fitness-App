@@ -43,7 +43,6 @@ class LoginScreen(Screen):
             if "Input" in widget_name:
                 if len(widget_object.text) == 0:
                     empty = True
-                    widget_object.icon_left_color_normal = (1,0,0,1)
                     widget_object.helper_text = widget_object.hint_text + " must not be empty"
         if not empty:
             print("DO THE LOGIN THINGY")
