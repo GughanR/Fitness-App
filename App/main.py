@@ -62,6 +62,9 @@ class ForgotPasswordScreen(Screen):
                 widget_object.text = ""
                 widget_object.helper_text = ""
 
+    def reset_password(self, email_address):
+        print(f"Reset password for {email_address}")
+
 
 class SignUpScreen(Screen):
     createAccountBtn = ObjectProperty(None)

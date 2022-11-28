@@ -28,6 +28,7 @@
     helper_text_color_normal: 0,0,0,1
     opacity: 1
     font_size: 40
+    icon_left_color_normal: 0,0,0,0.6
 
 
 <BackButton@MDIconButton>:
@@ -188,7 +189,6 @@
             mode: "round"
             icon_left: "key-variant"
             icon_left_color: "Blue"
-            icon_left_color_normal: 1,0,0,1
 
         MDFlatButton:
             size_hint: 0,0
@@ -312,16 +312,15 @@
             halign: "center"
 
         MDFillRoundFlatButton:
-            id: loginBtn
             size_hint: btnSize
             pos_hint: {'x': btnX, 'y': 0.2}
             text: "Reset Password"
             font_size: 50
             md_bg_color: 0,0,0,1
-            on_release: root.login()
+            on_release: root.reset_password(emailInput.text)
 
         MDTextFieldCustom:
-            id: unInput
+            id: emailInput
             required: True
             size_hint: tInpSize
             pos_hint: {'x': tInpX, 'y': 0.35}
