@@ -94,13 +94,21 @@ def verify_new_user(request: schemas.User, verification_code: int, db: Session =
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect code.")
 
-@app.get("/user")
-def test2(db: Session = Depends(get_db)):
-    users = db.query(models.Access_Token).filter_by(user_id = 1057).all()
+@app.post("/user")
+def test2(access_token: schemas.Access_Token, db: Session = Depends(get_db)):
+
+    statement = (
+        select(models.User)
+        .join(models.User.access_token)
+        .where(models.Access_Token.token_id == access_token.token_id)
+    )
+    users = db.scalars(statement).all()
+        
     return users
 
 @app.get("/user/login/username", status_code=status.HTTP_200_OK)
 def user_login(username: str, password:str, db: Session = Depends(get_db)):
+
     users = db.query(models.User).filter_by(user_name=username, password=password).all()
     
     if len(users) != 0:

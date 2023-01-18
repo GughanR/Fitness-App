@@ -16,6 +16,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition, NoTra
 from kivy.uix.button import Button
 from kivy.graphics import *
 
+import login
+
 Builder.load_file("My.kv")  # Load kivy file into main.py
 
 
@@ -45,7 +47,7 @@ class LoginScreen(Screen):
                     empty = True
                     widget_object.helper_text = widget_object.hint_text + " must not be empty"
         if not empty:
-            print("DO THE LOGIN THINGY")
+            login.login(self.unInput.text, self.pwInput.text)
 
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():
@@ -81,7 +83,13 @@ class SignUpScreen(Screen):
                     empty = True
                     widget_object.helper_text = widget_object.hint_text+" must not be empty"
         if not empty:
-            print("DO THE SIGN UP THINGY")
+            print(login.create_account(
+                self.nameInput.text,
+                self.emailInput.text,
+                self.unInput.text,
+                self.pwInput.text
+                )
+            )
 
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():

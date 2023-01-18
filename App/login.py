@@ -1,5 +1,8 @@
 # This module is reponsible for allowing access to users
 import string
+import requests
+import json
+from endpoints import Url
 
 def check_valid_details(name, email, username, password):
     alphabet = list(string.ascii_letters)
@@ -36,7 +39,56 @@ def check_valid_details(name, email, username, password):
     if contains_number == False:
         return False
 
+def is_email(user_input):
+    if "@" in user_input:
+        return True
+    else:
+        return False
 
+def get_access_token():
+    with open("access_token.json") as json_file:
+        data = json.load(json_file)
+        return data
+
+def login(user_input, password):
+    payload = {
+        "password": password
+    }
+
+    if is_email(user_input) == True:
+        login_url = Url.email_login
+        payload["email_address"] = user_input
+    else:
+        login_url = Url.username_login
+        payload["username"] = user_input
+
+    
+    response = requests.get(url=login_url, params=payload)
+    response_str = response.content.decode("utf-8") # decode bytestring and convert to json
+    access_token = json.dumps(json.loads(response_str), indent=4)
+
+    with open("access_token.json", "w+") as json_file:
+        json_file.write(access_token)
+
+    return response
+    
+def create_account(full_name, email_address, user_name,  password):
+    if check_valid_details(full_name, email_address, user_name, password):
+        pass
+    else:
+        return False
+    payload = {
+        "full_name": full_name,
+        "email_address": email_address,
+        "user_name": user_name,
+        "password": password
+    }
+    url = Url.create_user
+
+    response = requests.post(url=url, json=payload)
+
+    return response
+    
 
 if __name__ == "__main__":
-    print(check_valid_details(" ", ">@.", "c", "dddddddd0"))
+    login("string", "string")
