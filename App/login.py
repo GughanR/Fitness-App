@@ -4,13 +4,57 @@ import requests
 import json
 from endpoints import Url
 
-def check_valid_details(name, email, username, password):
+def check_name(name):
     alphabet = list(string.ascii_letters)
-    
     for char in name:
         if char not in alphabet:
             if ((char != " ") and (char != "'")):
-                return False
+                return "Name must only contain alphabetical characters"
+    return True
+
+def check_email(email):
+    alphabet = list(string.ascii_letters)
+    digits = "1234567890"
+    digits = list(digits)
+    email_valid_char = [
+        "!", "#", "$", "%", "&", "'"," *", "+", "-", "@",
+        "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."
+        ]
+    for char in email:
+        if char not in (alphabet + digits + email_valid_char):
+            return "Invalid character(s)"
+    num_of_ats = email.count("@")    
+    num_of_dots = email.count(".")
+    if num_of_ats != 1 or num_of_dots == 0:
+        return "Email must only contain one '@' and at least one '.'"
+    return True
+
+def check_username(username):
+    alphabet = list(string.ascii_letters)
+    for char in username:
+        if char not in alphabet:
+            return "Username must only contain alphabetical characters"
+    return True
+
+def check_password(password):
+    digits = "1234567890"
+    if len(password) < 8:
+        return "Password must be at least 8 characters"
+    contains_number = False
+    for digit in digits:
+        if digit in password:
+            contains_number = True
+    if contains_number == False:
+        return "Password must contain a number"
+    return True
+
+#########################################################
+def check_valid_details(name, email, username, password):
+    alphabet = list(string.ascii_letters)
+    for char in name:
+        if char not in alphabet:
+            if ((char != " ") and (char != "'")):
+                return {""}
     
     digits = "1234567890"
     digits = list(digits)
@@ -38,6 +82,7 @@ def check_valid_details(name, email, username, password):
             contains_number = True
     if contains_number == False:
         return False
+#########################################################
 
 def is_email(user_input):
     if "@" in user_input:
@@ -73,10 +118,6 @@ def login(user_input, password):
     return response
     
 def create_account(full_name, email_address, user_name,  password):
-    if check_valid_details(full_name, email_address, user_name, password):
-        pass
-    else:
-        return False
     payload = {
         "full_name": full_name,
         "email_address": email_address,
@@ -88,7 +129,25 @@ def create_account(full_name, email_address, user_name,  password):
     response = requests.post(url=url, json=payload)
 
     return response
+
+def verify(full_name, email_address, user_name,  password, verification_code):
+    payload = {
+        "full_name": full_name,
+        "email_address": email_address,
+        "user_name": user_name,
+        "password": password
+    }
+    code = {
+        "verification_code": verification_code
+    }
+    url = Url.verify_user
+
+    response = requests.post(url=url, params=code, json=payload)
+
+    return response
     
 
 if __name__ == "__main__":
-    login("string", "string")
+    user = "grug", "ab@g.com", "grggr", "jsjsjsjsjs888"
+    
+    print(verify("grug", "ab@g.com", "grggr", "jsjsjsjsjs888", 995433).content.decode("utf-8"))
