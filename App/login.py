@@ -3,6 +3,7 @@ import string
 import requests
 import json
 from endpoints import Url
+from datetime import datetime
 
 def check_name(name):
     alphabet = list(string.ascii_letters)
@@ -146,8 +147,27 @@ def verify(full_name, email_address, user_name,  password, verification_code):
 
     return response
     
+def reset_password(email_address):
+    payload = {
+        "email_address": email_address
+    }
+    url = Url.reset_password
+
+    response = requests.post(url=url, params=payload)
+
+    return response
+
+def check_access_token():
+    # Check if token is valid
+    token = get_access_token()
+    current_time = datetime.now()
+    expiry_time = token["expiry_time"].replace("T", " ")
+    expiry_time = datetime.strptime(expiry_time, "%Y-%m-%d %H:%M:%S")
+
+    if current_time < expiry_time:
+        return True
+    else:
+        return False
 
 if __name__ == "__main__":
-    user = "grug", "ab@g.com", "grggr", "jsjsjsjsjs888"
-    
-    print(verify("grug", "ab@g.com", "grggr", "jsjsjsjsjs888", 995433).content.decode("utf-8"))
+    check_access_token()

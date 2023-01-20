@@ -13,6 +13,7 @@ class Url:
     username_login = base+"/user/login/username"
     create_user = base+"/user/create/add"
     verify_user = base+"/user/create/verify"
+    reset_password = base+"/user/login/forgot"
 
 
 if __name__ == "__main__":

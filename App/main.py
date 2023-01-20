@@ -43,6 +43,7 @@ class LoginScreen(Screen):
     backBtn = ObjectProperty(None)
     unInput = ObjectProperty(None)
     pwInput = ObjectProperty(None)
+    dialog = None
 
     def login(self):
         empty = False
@@ -52,7 +53,22 @@ class LoginScreen(Screen):
                     empty = True
                     widget_object.helper_text = widget_object.hint_text + " must not be empty"
         if not empty:
-            login.login(self.unInput.text, self.pwInput.text)
+            try:
+                response = login.login(self.unInput.text, self.pwInput.text)
+
+                if response.status_code != 200:
+                    self.dialog = MDDialog(
+                        text=json.loads(response.content.decode("utf-8"))["detail"]
+                    ) 
+                    self.dialog.open()
+
+            except Exception as e:
+                self.dialog = MDDialog(
+                    text=e
+                ) 
+                self.dialog.open()
+
+        
 
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():
@@ -70,7 +86,24 @@ class ForgotPasswordScreen(Screen):
                 widget_object.helper_text = ""
 
     def reset_password(self, email_address):
-        print(f"Reset password for {email_address}")
+        try:
+            response = login.reset_password(email_address)
+            if response.status_code != 200:
+                self.dialog = MDDialog(
+                    text=json.loads(response.content.decode("utf-8"))["detail"]
+                ) 
+                self.dialog.open()
+            else:
+                self.dialog = MDDialog(
+                    text="Password has been reset\n\nCheck your email"
+                ) 
+                self.dialog.open()
+        except Exception as e:
+            self.dialog = MDDialog(
+                    text=e
+                ) 
+            self.dialog.open()
+            
 
 
 class SignUpScreen(Screen):
@@ -138,7 +171,6 @@ class SignUpScreen(Screen):
                 self.dialog = MDDialog(
                     text="Connection failed"
                 ) 
-                
                 self.dialog.open()
             
 
@@ -178,6 +210,13 @@ class VerifyUserScreen(Screen):
                     text=json.loads(response.content.decode("utf-8"))["detail"]
                 ) 
                 self.dialog.open()
+            else:
+                self.dialog = MDDialog(
+                    text="Account created\n\nPlease login"
+                ) 
+                self.dialog.open()
+                self.manager.transition.direction = "left"
+                self.manager.current = "login"
 
         except ValueError:
             self.codeInput.helper_text = "Verification code must be a number"
@@ -197,6 +236,7 @@ class FitnessApp(MDApp):
         pass
 
     def build(self):
+        # Add screens to screen manager
         self.theme_cls.primary_palette = "Red"
         self.theme_cls.theme_style = "Light"
         sm = ScreenManager(transition=SlideTransition())
@@ -205,6 +245,14 @@ class FitnessApp(MDApp):
         sm.add_widget(LoginScreen(name="login"))
         sm.add_widget(ForgotPasswordScreen(name="forgot"))
         sm.add_widget(VerifyUserScreen(name="verify"))
+
+        # Check if sign in required
+        if login.check_access_token():
+            print(True)
+            sm.current = "login"
+        else:
+            print(False)
+
         return sm
 
 

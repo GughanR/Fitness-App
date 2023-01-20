@@ -4,11 +4,12 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import select
+from sqlalchemy import select, update
 import random
 import json
 import string
 import datetime
+import email_manager
 
 app = FastAPI()
 
@@ -53,9 +54,12 @@ def generate_access_token():
 @app.post("/user/create/add", status_code=status.HTTP_200_OK)
 def add_new_user(request: schemas.User, db: Session = Depends(get_db)):
 
+    code  = generate_code()
     new_data = {
-            request.email_address: generate_code()
+            request.email_address: code
         }
+
+    email_manager.send_verification(request.email_address, code)
 
     with open("new_emails.json", "r+", encoding="utf-8") as json_file:
         try:
@@ -150,3 +154,19 @@ def user_login(email_address: str, password:str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid credentials.")
 
     return access_token
+
+@app.post("/user/login/forgot", status_code=status.HTTP_200_OK)
+def forgot_password(email_address: str, db: Session = Depends(get_db)):
+    new_password = generate_code()
+    statement = (
+        update(models.User)
+        .where(models.User.email_address == email_address)
+        .values(password = new_password)
+    )
+    try:
+        db.execute(statement)
+        db.commit()
+
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="User does not exist.")
+    return {"detail": "success"}
