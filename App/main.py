@@ -19,6 +19,7 @@ from kivy.graphics import *
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
+from kivymd.uix.bottomnavigation.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 
 import login
 import json
@@ -46,6 +47,9 @@ class LoginScreen(Screen):
     dialog = None
 
     def login(self):
+        #
+        self.manager.current = "main"
+        #
         empty = False
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:
@@ -61,10 +65,13 @@ class LoginScreen(Screen):
                         text=json.loads(response.content.decode("utf-8"))["detail"]
                     ) 
                     self.dialog.open()
+                else:
+                    print("logged in")
+                    MDApp.get_running_app().yo()
 
             except Exception as e:
                 self.dialog = MDDialog(
-                    text=e
+                    text=str(e)
                 ) 
                 self.dialog.open()
 
@@ -100,11 +107,10 @@ class ForgotPasswordScreen(Screen):
                 self.dialog.open()
         except Exception as e:
             self.dialog = MDDialog(
-                    text=e
+                    text=str(e)
                 ) 
             self.dialog.open()
             
-
 
 class SignUpScreen(Screen):
     createAccountBtn = ObjectProperty(None)
@@ -180,6 +186,7 @@ class SignUpScreen(Screen):
                 widget_object.text = ""
                 widget_object.helper_text = ""
 
+
 class VerifyUserScreen(Screen):
 
     codeInput = ObjectProperty(None)
@@ -228,6 +235,10 @@ class VerifyUserScreen(Screen):
                 ) 
             self.dialog.open()
 
+
+class MainScreen(Screen):
+    pass
+
 class FitnessApp(MDApp):
     x = 700
     Window.size = (x, x / 9 * 16)
@@ -245,6 +256,7 @@ class FitnessApp(MDApp):
         sm.add_widget(LoginScreen(name="login"))
         sm.add_widget(ForgotPasswordScreen(name="forgot"))
         sm.add_widget(VerifyUserScreen(name="verify"))
+        sm.add_widget(MainScreen(name="main"))
 
         # Check if sign in required
         if login.check_access_token():
