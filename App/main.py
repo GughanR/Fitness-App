@@ -1,3 +1,4 @@
+# உ
 import kivy
 
 from kivy.app import App
@@ -20,6 +21,9 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.bottomnavigation.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
+from kivymd.uix.scrollview import MDScrollView
+from kivy.utils import get_color_from_hex 
+
 
 import login
 import json
@@ -124,8 +128,6 @@ class SignUpScreen(Screen):
 
     def create_account(self):
         invalid = False
-
-        
 
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:
@@ -239,8 +241,67 @@ class VerifyUserScreen(Screen):
 class MainScreen(Screen):
     pass
 
+class AccountPage(MDScrollView):
+    updateBtn = ObjectProperty(None)
+    nameInput = ObjectProperty(None)
+    emailInput = ObjectProperty(None)
+    unInput = ObjectProperty(None)
+    #pwInput = ObjectProperty(None)
+    dialog = None
+    #verifyDialog = ObjectProperty(None)
+    #codeInput = ObjectProperty(None)
+
+    def update_account(self):
+        invalid = False
+
+        for widget_name, widget_object in self.ids.items():
+            if "Input" in widget_name:
+
+                if "name" in widget_name:
+                    response = login.check_name(widget_object.text)
+                elif "email" in widget_name:
+                    response = login.check_email(widget_object.text)
+                elif "un" in widget_name:
+                    response = login.check_username(widget_object.text)
+                else:
+                    response = True
+
+                if len(widget_object.text) == 0:
+                    invalid = True
+                    widget_object.helper_text = widget_object.hint_text+" must not be empty"
+                elif type(response) == str:
+                    widget_object.helper_text = response
+                    invalid = True
+                else:
+                    widget_object.helper_text = ""
+
+        if not invalid:
+            try:
+                response = login.update_account(
+                    self.nameInput.text,
+                    self.emailInput.text,
+                    self.unInput.text
+                    )
+
+                if response.status_code != 200:
+                    self.dialog = MDDialog(
+                        text=json.loads(response.content.decode("utf-8"))["detail"]
+                    )
+                    self.dialog.open()
+                else:
+                    self.dialog = MDDialog(
+                        text="Successfully updated"
+                    )
+                    self.dialog.open()
+
+            except:
+                self.dialog = MDDialog(
+                    text="Connection failed"
+                ) 
+                self.dialog.open()
+
 class FitnessApp(MDApp):
-    x = 700
+    x = 500
     Window.size = (x, x / 9 * 16)
 
     def on_start(self):
@@ -249,6 +310,9 @@ class FitnessApp(MDApp):
     def build(self):
         # Add screens to screen manager
         self.theme_cls.primary_palette = "Red"
+        self.theme_cls.accent_palette = "DeepPurple"
+        print(dir(self.theme_cls))
+        #self.theme_cls.bg_dark = get_color_from_hex("#8c78ff")
         self.theme_cls.theme_style = "Light"
         sm = ScreenManager(transition=SlideTransition())
         sm.add_widget(InitialScreen(name="initial"))
@@ -257,6 +321,7 @@ class FitnessApp(MDApp):
         sm.add_widget(ForgotPasswordScreen(name="forgot"))
         sm.add_widget(VerifyUserScreen(name="verify"))
         sm.add_widget(MainScreen(name="main"))
+        sm.current = "main"
 
         # Check if sign in required
         if login.check_access_token():

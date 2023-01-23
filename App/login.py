@@ -169,5 +169,25 @@ def check_access_token():
     else:
         return False
 
+def update_account(full_name, email_address, user_name):
+    payload = {
+        "full_name": full_name,
+        "email_address": email_address,
+        "user_name": user_name
+    }
+    url = Url.update_account
+
+    response = requests.put(url=url) ###########
+
+def get_user_details():
+    payload = {
+        "token": get_access_token()["token"]
+    }
+    url = Url.get_user_details
+
+    response = requests.get(url=url, params=payload)
+
+    return response
+
 if __name__ == "__main__":
     check_access_token()

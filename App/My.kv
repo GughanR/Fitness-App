@@ -32,7 +32,7 @@
 
 
 <BackButton@MDIconButton>:
-    pos_hint: {'x': 0.02, 'y': 0.9 }
+    pos_hint: {"x": 0.02, "y": 0.9 }
     size_hint: 0.2, 0.05
     icon: "arrow-left"
     icon_size: 50
@@ -63,6 +63,14 @@
             size: ((self.width * btnSize[0]/2)-40), 2
             pos: ((self.width * 0.5)+40), (self.height * 0.314)
 
+<TitleLine@Widget>:
+    height: 6
+    canvas:
+        Color:
+            rgba: 
+                0,0,0,1
+        Rectangle:
+            size:200, 20
 
 <InitialScreen>:
 
@@ -84,11 +92,11 @@
 
         Image:
             source: "Images/dumbbell.png"
-            pos_hint: {'x': 0.2, 'y': 0.7 }
+            pos_hint: {"x": 0.2, "y": 0.7 }
             size_hint: 0.6, 0.1
             allow_stretch: True
         MDLabel:
-            pos_hint: {'x': 0.05, 'y': 0.55 }
+            pos_hint: {"x": 0.05, "y": 0.55 }
             size_hint: 0.9, 0.2
             text: "AI FITNESS"
             halign: "center"
@@ -97,7 +105,7 @@
 
         MDLabel:
             size_hint: 0.9, 0.07
-            pos_hint: {'x': 0.05, 'y': 0.28}
+            pos_hint: {"x": 0.05, "y": 0.28}
             text: "OR"
             halign: "center"
             font_size: 40
@@ -105,7 +113,7 @@
 
         MDFillRoundFlatButton:
             size_hint: btnSize
-            pos_hint: {'x': btnX, 'y': 0.35}
+            pos_hint: {"x": btnX, "y": 0.35}
             text: "Login"
             font_size: 50
             on_release:
@@ -114,7 +122,7 @@
 
         MDFillRoundFlatButton:
             size_hint: btnSize
-            pos_hint: {'x': btnX, 'y': 0.2}
+            pos_hint: {"x": btnX, "y": 0.2}
             text: "Sign Up"
             font_size: 50
             on_release:
@@ -134,12 +142,12 @@
 
         Image:
             source: "Images/dumbbell.png"
-            pos_hint: {'x': 0.2, 'y': 0.7 }
+            pos_hint: {"x": 0.2, "y": 0.7 }
             size_hint: 0.6, 0.1
             allow_stretch: True
 
         MDLabel:  # Delete
-            pos_hint: {'x': 0.05, 'y': 0.55 }
+            pos_hint: {"x": 0.05, "y": 0.55 }
             size_hint: 0.9, 0.2
             text: ""
             halign: "center"
@@ -153,7 +161,7 @@
                 root.manager.current = "initial"
 
         MDLabel:  # Delete
-            pos_hint: {'x': 0.05, 'y': 0.7 }
+            pos_hint: {"x": 0.05, "y": 0.7 }
             size_hint: 0.9, 0.2
             text: ""
             halign: "left"
@@ -162,7 +170,7 @@
         MDFillRoundFlatButton:
             id: loginBtn
             size_hint: btnSize
-            pos_hint: {'x': btnX, 'y': 0.2}
+            pos_hint: {"x": btnX, "y": 0.2}
             text: "Login"
             font_size: 50
             md_bg_color: 0,0,0,1
@@ -172,7 +180,7 @@
             id: unInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.5}
+            pos_hint: {"x": tInpX, "y": 0.5}
             hint_text: "Username / Email"
             helper_text_mode: "on_error"
             mode: "round"
@@ -182,7 +190,7 @@
             id: pwInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.4}
+            pos_hint: {"x": tInpX, "y": 0.4}
             hint_text: "Password"
             password: True
             helper_text_mode: "on_error"
@@ -192,7 +200,7 @@
 
         MDFlatButton:
             size_hint: 0,0
-            pos_hint: {'x': tInpX, 'y': 0.33}
+            pos_hint: {"x": tInpX, "y": 0.33}
             font_size: 40
             halign: "left"
             text: "[u]Forgot password?[/u]"
@@ -217,7 +225,7 @@
 
         Image:
             source: "Images/dumbbell.png"
-            pos_hint: {'x': 0.2, 'y': 0.75 }
+            pos_hint: {"x": 0.2, "y": 0.75 }
             size_hint: 0.6, 0.1
             allow_stretch: True
 
@@ -229,7 +237,7 @@
 
 
         MDLabel:
-            pos_hint: {'x': 0.05, 'y': 0.7 }
+            pos_hint: {"x": 0.05, "y": 0.7 }
             size_hint: 0.9, 0.2
             text: ""
             halign: "left"
@@ -238,7 +246,7 @@
         MDFillRoundFlatButton:
             id: createAccountBtn
             size_hint: btnSize
-            pos_hint: {'x': btnX, 'y': 0.15}
+            pos_hint: {"x": btnX, "y": 0.15}
             text: "Sign Up"
             on_release: root.create_account()
 
@@ -246,7 +254,7 @@
             id: nameInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.6}
+            pos_hint: {"x": tInpX, "y": 0.6}
             hint_text: "Name"
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
@@ -257,7 +265,7 @@
             id: emailInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.5}
+            pos_hint: {"x": tInpX, "y": 0.5}
             hint_text: "Email"
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
@@ -268,7 +276,7 @@
             id: unInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.4}
+            pos_hint: {"x": tInpX, "y": 0.4}
             hint_text: "Username"
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
@@ -279,7 +287,7 @@
             id: pwInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.3}
+            pos_hint: {"x": tInpX, "y": 0.3}
             hint_text: "Password"
             password: True
             helper_text_mode: "persistent"
@@ -308,13 +316,13 @@
 
         Image:
             source: "Images/dumbbell.png"
-            pos_hint: {'x': 0.2, 'y': 0.65 }
+            pos_hint: {"x": 0.2, "y": 0.65 }
             size_hint: 0.6, 0.1
             allow_stretch: True
 
         MDFillRoundFlatButton:
             size_hint: btnSize
-            pos_hint: {'x': btnX, 'y': 0.25}
+            pos_hint: {"x": btnX, "y": 0.25}
             text: "Verify"
             font_size: 50
             md_bg_color: 0,0,0,1
@@ -324,7 +332,7 @@
             id: codeInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.4}
+            pos_hint: {"x": tInpX, "y": 0.4}
             hint_text: "Verification code"
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
@@ -344,13 +352,13 @@
 
         Image:
             source: "Images/dumbbell.png"
-            pos_hint: {'x': 0.2, 'y': 0.65 }
+            pos_hint: {"x": 0.2, "y": 0.65 }
             size_hint: 0.6, 0.1
             allow_stretch: True
 
         MDFillRoundFlatButton:
             size_hint: btnSize
-            pos_hint: {'x': btnX, 'y': 0.25}
+            pos_hint: {"x": btnX, "y": 0.25}
             text: "Reset Password"
             font_size: 50
             md_bg_color: 0,0,0,1
@@ -360,44 +368,113 @@
             id: emailInput
             required: True
             size_hint: tInpSize
-            pos_hint: {'x': tInpX, 'y': 0.4}
+            pos_hint: {"x": tInpX, "y": 0.4}
             hint_text: "Email"
             helper_text_mode: "on_error"
             mode: "round"
             icon_left: "email"
 
 <MainScreen>:
+
     MDBottomNavigation:
-        #panel_color: "#eeeaea"
-        selected_color_background: "orange"
-        text_color_active: "lightgrey"
+        panel_color: "#ffffff"
+        text_color_active: "#5542ff"
+        selected_color_background: "#5542ff"
 
         MDBottomNavigationItem:
-            name: 'screen 1'
-            text: 'Mail'
-            icon: 'gmail'
-            badge_icon: "numeric-10"
+            name: "ViewProgress"
+            text: "Progress"
+            icon: "finance"
 
             MDLabel:
-                text: 'Mail'
-                halign: 'center'
+                text: "Mail"
+                halign: "center"
 
         MDBottomNavigationItem:
-            name: 'screen 2'
-            text: 'Twitter'
-            icon: 'twitter'
-            badge_icon: "numeric-5"
+            name: "Workout"
+            text: "Workout"
+            icon: "weight-lifter"
 
             MDLabel:
-                text: 'Twitter'
-                halign: 'center'
+                text: "Twitter"
+                halign: "center"
 
         MDBottomNavigationItem:
-            name: 'screen 3'
-            text: 'LinkedIN'
-            icon: 'linkedin'
-            Background
+            name: "Account"
+            text: "Account"
+            icon: "account-cog"
 
-            MDLabel:
-                text: 'LinkedIN'
-                halign: 'center'
+            AccountPage
+
+
+<AccountPage>:
+    nameInput: nameInput
+    emailInput: emailInput
+    unInput: unInput
+    updateBtn: updateBtn
+
+    bg_dark: "#eeeeee"
+    
+    MDGridLayout:
+        adaptive_height: True
+        cols: 1
+        padding: 40, 40
+        spacing: 10, 20
+        row_default_height: 100      
+
+        MDLabel:
+            text: "Account Details"
+            halign: "left"
+            font_size: 30
+            height: 100
+
+        Widget:
+            size: 100, 10
+            height: 100
+            canvas:
+                Color:
+                    rgba:
+                        0,0,0,1
+                Rectangle:
+                    pos: self.x, self.y+50
+                    size: self.width, 2
+
+        MDTextField:
+            id: nameInput
+            hint_text: "Name"
+            mode: "rectangle"
+            size_hint_y: 1
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+
+        MDTextField:
+            id: emailInput
+            hint_text: "Email Address"
+            mode: "rectangle"
+            size_hint_y: 1
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+
+        MDTextField:
+            id: unInput
+            hint_text: "Username"
+            mode: "rectangle"
+            size_hint_y: 1
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+
+        MDFillRoundFlatButton:
+            id: updateBtn
+            size_hint: btnSize
+            pos_hint: {"x": btnX, "y": 0.25}
+            text: "Update Details"
+            font_size: 50
+            md_bg_color: 0,0,0,1
+            on_release: root.update_account()
+
+        MDFillRoundFlatButton:
+            size_hint: btnSize
+            pos_hint: {"x": btnX, "y": 0.25}
+            text: "Change Password"
+            font_size: 50
+            md_bg_color: 0,0,0,1

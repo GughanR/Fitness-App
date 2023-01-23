@@ -170,3 +170,14 @@ def forgot_password(email_address: str, db: Session = Depends(get_db)):
     except:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="User does not exist.")
     return {"detail": "success"}
+
+@app.get("/user/details", status_code=status.HTTP_200_OK)
+def get_user_details(token: str, db: Session = Depends(get_db)):
+    statement = (
+        select(models.User)
+        .join(models.User.access_token)
+        .where(models.Access_Token.token == token)
+    )
+    user = db.scalars(statement).one()
+    
+    return user
