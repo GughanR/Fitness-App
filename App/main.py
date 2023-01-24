@@ -31,6 +31,12 @@ import json
 Builder.load_file("My.kv")  # Load kivy file into main.py
 
 
+def show_dialog(self, text):
+    self.dialog = MDDialog(
+        text=text
+    )
+    self.dialog.open()
+
 class Background(FloatLayout):
     pass
 
@@ -52,7 +58,7 @@ class LoginScreen(Screen):
 
     def login(self):
         #
-        self.manager.current = "main"
+        #self.manager.current = "main"
         #
         empty = False
         for widget_name, widget_object in self.ids.items():
@@ -65,19 +71,19 @@ class LoginScreen(Screen):
                 response = login.login(self.unInput.text, self.pwInput.text)
 
                 if response.status_code != 200:
-                    self.dialog = MDDialog(
+                    show_dialog(
+                        self,
                         text=json.loads(response.content.decode("utf-8"))["detail"]
                     ) 
-                    self.dialog.open()
                 else:
                     print("logged in")
-                    MDApp.get_running_app().yo()
+                    self.manager.current = "main"
 
             except Exception as e:
-                self.dialog = MDDialog(
+                show_dialog(
+                    self,
                     text=str(e)
                 ) 
-                self.dialog.open()
 
         
 
@@ -100,20 +106,20 @@ class ForgotPasswordScreen(Screen):
         try:
             response = login.reset_password(email_address)
             if response.status_code != 200:
-                self.dialog = MDDialog(
+                show_dialog(
+                    self,
                     text=json.loads(response.content.decode("utf-8"))["detail"]
                 ) 
-                self.dialog.open()
             else:
-                self.dialog = MDDialog(
+                show_dialog(
+                    self,
                     text="Password has been reset\n\nCheck your email"
                 ) 
-                self.dialog.open()
         except Exception as e:
-            self.dialog = MDDialog(
-                    text=str(e)
-                ) 
-            self.dialog.open()
+            show_dialog(
+                self, 
+                text=str(e)
+            )
             
 
 class SignUpScreen(Screen):
@@ -162,10 +168,10 @@ class SignUpScreen(Screen):
                     )
 
                 if response.status_code != 200:
-                    self.dialog = MDDialog(
+                    show_dialog(
+                        self,
                         text="Server error"
                     )
-                    self.dialog.open()
                 else:
                     # Pass variables to verification screen
                     self.manager.screens[4].fullname = self.nameInput.text
@@ -176,10 +182,10 @@ class SignUpScreen(Screen):
                     self.manager.current = "verify"
 
             except:
-                self.dialog = MDDialog(
+                show_dialog(
+                    self,
                     text="Connection failed"
-                ) 
-                self.dialog.open()
+                )
             
 
     def reset_inputs(self):
@@ -215,15 +221,17 @@ class VerifyUserScreen(Screen):
                 verification_code=int(self.codeInput.text)
             )
             if response.status_code != 200:
-                self.dialog = MDDialog(
+                show_dialog(
+                    self,
                     text=json.loads(response.content.decode("utf-8"))["detail"]
                 ) 
-                self.dialog.open()
+                
             else:
-                self.dialog = MDDialog(
+                show_dialog(
+                    self,
                     text="Account created\n\nPlease login"
                 ) 
-                self.dialog.open()
+                
                 self.manager.transition.direction = "left"
                 self.manager.current = "login"
 
@@ -232,10 +240,11 @@ class VerifyUserScreen(Screen):
 
         except Exception as e:
             print(e)
-            self.dialog = MDDialog(
-                    text="Connection failed"
-                ) 
-            self.dialog.open()
+            show_dialog(
+                self,
+                text="Connection failed"
+            ) 
+            
 
 
 class MainScreen(Screen):
@@ -284,21 +293,24 @@ class AccountPage(MDScrollView):
                     )
 
                 if response.status_code != 200:
-                    self.dialog = MDDialog(
+                    show_dialog(
+                        self,
                         text=json.loads(response.content.decode("utf-8"))["detail"]
                     )
-                    self.dialog.open()
+                    
                 else:
-                    self.dialog = MDDialog(
+                    show_dialog(
+                        self,
                         text="Successfully updated"
                     )
-                    self.dialog.open()
+                    
 
             except:
-                self.dialog = MDDialog(
+                show_dialog(
+                    self,
                     text="Connection failed"
                 ) 
-                self.dialog.open()
+                
 
 class FitnessApp(MDApp):
     x = 500
@@ -311,7 +323,6 @@ class FitnessApp(MDApp):
         # Add screens to screen manager
         self.theme_cls.primary_palette = "Red"
         self.theme_cls.accent_palette = "DeepPurple"
-        print(dir(self.theme_cls))
         #self.theme_cls.bg_dark = get_color_from_hex("#8c78ff")
         self.theme_cls.theme_style = "Light"
         sm = ScreenManager(transition=SlideTransition())
@@ -326,7 +337,7 @@ class FitnessApp(MDApp):
         # Check if sign in required
         if login.check_access_token():
             print(True)
-            sm.current = "login"
+            sm.current = "main"
         else:
             print(False)
 
