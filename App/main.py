@@ -275,9 +275,9 @@ class AccountPage(MDScrollView):
     def refresh(self):  # Ran when screen is refreshed
         try:
             user_details = user.get_user_details()
-            nameText = user_details["full_name"]
-            emailText = user_details["email_address"]
-            unText = user_details["user_name"]
+            self.nameInput.text = user_details["full_name"]
+            self.emailInput.text = user_details["email_address"]
+            self.unInput.text = user_details["user_name"]
         except:
             show_dialog(self, "Connection failed")
 
@@ -337,7 +337,7 @@ class AccountPage(MDScrollView):
                 
 
 class FitnessApp(MDApp):
-    x = 500
+    x = 700
     Window.size = (x, x / 9 * 16)
     MDApp.title = "Fitness App"
 
