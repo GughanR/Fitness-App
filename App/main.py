@@ -8,7 +8,7 @@ from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.lang import Builder
 from kivy.uix.widget import Widget, WidgetBase
 import time
@@ -22,10 +22,11 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.bottomnavigation.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 from kivymd.uix.scrollview import MDScrollView
+from kivymd.uix.refreshlayout import MDScrollViewRefreshLayout
 from kivy.utils import get_color_from_hex 
 
 
-import login
+import user
 import json
 
 Builder.load_file("My.kv")  # Load kivy file into main.py
@@ -68,7 +69,7 @@ class LoginScreen(Screen):
                     widget_object.helper_text = widget_object.hint_text + " must not be empty"
         if not empty:
             try:
-                response = login.login(self.unInput.text, self.pwInput.text)
+                response = user.login(self.unInput.text, self.pwInput.text)
 
                 if response.status_code != 200:
                     show_dialog(
@@ -104,7 +105,7 @@ class ForgotPasswordScreen(Screen):
 
     def reset_password(self, email_address):
         try:
-            response = login.reset_password(email_address)
+            response = user.reset_password(email_address)
             if response.status_code != 200:
                 show_dialog(
                     self,
@@ -139,13 +140,13 @@ class SignUpScreen(Screen):
             if "Input" in widget_name:
 
                 if "name" in widget_name:
-                    response = login.check_name(widget_object.text)
+                    response = user.check_name(widget_object.text)
                 elif "email" in widget_name:
-                    response = login.check_email(widget_object.text)
+                    response = user.check_email(widget_object.text)
                 elif "un" in widget_name:
-                    response = login.check_username(widget_object.text)
+                    response = user.check_username(widget_object.text)
                 elif "pw" in widget_name:
-                    response = login.check_password(widget_object.text)
+                    response = user.check_password(widget_object.text)
                 else:
                     response = True
 
@@ -160,7 +161,7 @@ class SignUpScreen(Screen):
 
         if not invalid:
             try:
-                response = login.create_account(
+                response = user.create_account(
                     self.nameInput.text,
                     self.emailInput.text,
                     self.unInput.text,
@@ -213,7 +214,7 @@ class VerifyUserScreen(Screen):
     def verify(self):
         self.codeInput.helper_text = ""
         try:
-            response = login.verify(
+            response = user.verify(
                 full_name=self.fullname,
                 email_address=self.email,
                 user_name=self.username,
@@ -260,6 +261,29 @@ class AccountPage(MDScrollView):
     #verifyDialog = ObjectProperty(None)
     #codeInput = ObjectProperty(None)
 
+    # Set values for current details
+    try:
+        user_details = user.get_user_details()
+        nameText = user_details["full_name"]
+        emailText = user_details["email_address"]
+        unText = user_details["user_name"]
+    except:
+        nameText = ""
+        emailText = ""
+        unText = ""       
+
+    def refresh(self):  # Ran when screen is refreshed
+        try:
+            user_details = user.get_user_details()
+            nameText = user_details["full_name"]
+            emailText = user_details["email_address"]
+            unText = user_details["user_name"]
+        except:
+            show_dialog(self, "Connection failed")
+
+    def show(self):
+        show_dialog(self, "con")
+
     def update_account(self):
         invalid = False
 
@@ -267,11 +291,11 @@ class AccountPage(MDScrollView):
             if "Input" in widget_name:
 
                 if "name" in widget_name:
-                    response = login.check_name(widget_object.text)
+                    response = user.check_name(widget_object.text)
                 elif "email" in widget_name:
-                    response = login.check_email(widget_object.text)
+                    response = user.check_email(widget_object.text)
                 elif "un" in widget_name:
-                    response = login.check_username(widget_object.text)
+                    response = user.check_username(widget_object.text)
                 else:
                     response = True
 
@@ -286,7 +310,7 @@ class AccountPage(MDScrollView):
 
         if not invalid:
             try:
-                response = login.update_account(
+                response = user.update_account(
                     self.nameInput.text,
                     self.emailInput.text,
                     self.unInput.text
@@ -315,13 +339,14 @@ class AccountPage(MDScrollView):
 class FitnessApp(MDApp):
     x = 500
     Window.size = (x, x / 9 * 16)
+    MDApp.title = "Fitness App"
 
     def on_start(self):
         pass
 
     def build(self):
         # Add screens to screen manager
-        self.theme_cls.primary_palette = "Red"
+        self.theme_cls.primary_palette = "DeepPurple"
         self.theme_cls.accent_palette = "DeepPurple"
         #self.theme_cls.bg_dark = get_color_from_hex("#8c78ff")
         self.theme_cls.theme_style = "Light"
@@ -332,10 +357,10 @@ class FitnessApp(MDApp):
         sm.add_widget(ForgotPasswordScreen(name="forgot"))
         sm.add_widget(VerifyUserScreen(name="verify"))
         sm.add_widget(MainScreen(name="main"))
-        sm.current = "main"
+        #sm.current = "main"
 
         # Check if sign in required
-        if login.check_access_token():
+        if user.check_access_token():
             print(True)
             sm.current = "main"
         else:

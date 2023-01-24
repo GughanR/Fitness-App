@@ -64,13 +64,15 @@
             pos: ((self.width * 0.5)+40), (self.height * 0.314)
 
 <TitleLine@Widget>:
-    height: 6
+    size: 100, 10
+    height: 100
     canvas:
         Color:
-            rgba: 
+            rgba:
                 0,0,0,1
         Rectangle:
-            size:200, 20
+            pos: self.x, self.y+50
+            size: self.width, 2
 
 <InitialScreen>:
 
@@ -414,36 +416,38 @@
     updateBtn: updateBtn
 
     bg_dark: "#eeeeee"
-    
+
     MDGridLayout:
         adaptive_height: True
         cols: 1
-        padding: 40, 40
-        spacing: 10, 20
-        row_default_height: 100      
+        padding: 20, 40
+        spacing: 20
+        #row_default_height: 80  
+
+        AnchorLayout:  # Move button to right
+            anchor_x: "right"
+            MDIconButton:
+                #pos_hint: {"x": 0.78, "y": 0.9 }
+                icon: "refresh"
+                halign: "right"
+                on_release: root.refresh()
+                #icon_size: 50  
 
         MDLabel:
             text: "Account Details"
             halign: "left"
-            font_size: 30
-            height: 100
+            font_size: 60
+            adaptive_height: True
 
-        Widget:
-            size: 100, 10
-            height: 100
-            canvas:
-                Color:
-                    rgba:
-                        0,0,0,1
-                Rectangle:
-                    pos: self.x, self.y+50
-                    size: self.width, 2
+        #TitleLine
+        MDSeparator:
+            row_height: 10
 
         MDTextField:
             id: nameInput
             hint_text: "Name"
             mode: "rectangle"
-            size_hint_y: 1
+            text: root.nameText
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
 
@@ -451,7 +455,7 @@
             id: emailInput
             hint_text: "Email Address"
             mode: "rectangle"
-            size_hint_y: 1
+            text: root.emailText
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
 
@@ -459,7 +463,7 @@
             id: unInput
             hint_text: "Username"
             mode: "rectangle"
-            size_hint_y: 1
+            text: root.unText
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
 

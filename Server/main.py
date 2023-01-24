@@ -50,6 +50,24 @@ def generate_access_token():
         access_token += random.choice(alphanumeric)
     return access_token
 
+def check_valid_token(db, token):
+    try:
+        statement = (
+            select(models.Access_Token.expiry_time)
+            .where(models.Access_Token.token==token)
+        )
+        expiry_time = db.scalars(statement).one()
+        
+        if expiry_time >= datetime.datetime.now():
+            return True
+        else:
+            return False
+
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Invalid token.")
+
 
 @app.post("/user/create/add", status_code=status.HTTP_200_OK)
 def add_new_user(request: schemas.User, db: Session = Depends(get_db)):
@@ -173,11 +191,15 @@ def forgot_password(email_address: str, db: Session = Depends(get_db)):
 
 @app.get("/user/details", status_code=status.HTTP_200_OK)
 def get_user_details(token: str, db: Session = Depends(get_db)):
-    statement = (
+    if check_valid_token(db, token):
+        statement = (
         select(models.User)
         .join(models.User.access_token)
         .where(models.Access_Token.token == token)
-    )
-    user = db.scalars(statement).one()
+        )
+        user = db.scalars(statement).one()
+        
+        return user
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
     
-    return user

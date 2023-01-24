@@ -186,8 +186,9 @@ def get_user_details():
     url = Url.get_user_details
 
     response = requests.get(url=url, params=payload)
-
-    return response
+    
+    return json.loads(response.content.decode("utf-8"))
+    
 
 if __name__ == "__main__":
-    check_access_token()
+    print(get_user_details())
