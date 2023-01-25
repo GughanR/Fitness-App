@@ -52,11 +52,11 @@ def generate_access_token():
 
 def check_valid_token(db, token):
     try:
-        statement = (
+        statement_2 = (
             select(models.Access_Token.expiry_time)
             .where(models.Access_Token.token==token)
         )
-        expiry_time = db.scalars(statement).one()
+        expiry_time = db.scalars(statement_2).one()
         
         if expiry_time >= datetime.datetime.now():
             return True
@@ -119,12 +119,12 @@ def verify_new_user(request: schemas.User, verification_code: int, db: Session =
 @app.post("/user")
 def test2(access_token: schemas.Access_Token, db: Session = Depends(get_db)):
 
-    statement = (
+    statement_2 = (
         select(models.User)
         .join(models.User.access_token)
         .where(models.Access_Token.token_id == access_token.token_id)
     )
-    users = db.scalars(statement).all()
+    users = db.scalars(statement_2).all()
         
     return users
 
@@ -176,13 +176,13 @@ def user_login(email_address: str, password:str, db: Session = Depends(get_db)):
 @app.post("/user/login/forgot", status_code=status.HTTP_200_OK)
 def forgot_password(email_address: str, db: Session = Depends(get_db)):
     new_password = generate_code()
-    statement = (
+    statement_2 = (
         update(models.User)
         .where(models.User.email_address == email_address)
         .values(password = new_password)
     )
     try:
-        db.execute(statement)
+        db.execute(statement_2)
         db.commit()
 
     except:
@@ -191,15 +191,90 @@ def forgot_password(email_address: str, db: Session = Depends(get_db)):
 
 @app.get("/user/details", status_code=status.HTTP_200_OK)
 def get_user_details(token: str, db: Session = Depends(get_db)):
-    if check_valid_token(db, token):
-        statement = (
-        select(models.User)
-        .join(models.User.access_token)
-        .where(models.Access_Token.token == token)
-        )
-        user = db.scalars(statement).one()
-        
-        return user
-    else:
+
+    if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+    
+    statement_2 = (
+    select(models.User)
+    .join(models.User.access_token)
+    .where(models.Access_Token.token == token)
+    )
+    try:
+        user = db.scalars(statement_2).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error.")
+    
+    return user
+    
+@app.put("/user/update/details", status_code=status.HTTP_200_OK)
+def update_details(token: str, user: schemas.Updated_User, db: Session = Depends(get_db)):
+    
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    user_details = get_user_details(token=token, db=db)
+    print(user_details.user_name)
+
+    for key, value in dict(user).items():
+        if value:
+            exec(f'user_details.{key} = value')
+
+    print(user_details.user_name)           
+
+
+    statement_2 = (
+        update(models.User)
+        .where(models.User.user_id == user_details.user_id)
+        .values(
+        user_name=user_details.user_name,
+        full_name=user_details.full_name,
+        email_address=user_details.email_address,
+        unit_weight=user_details.unit_weight
+        )
+    )
+
+    db.execute(statement_2)
+    db.commit()
+
+    return {"detail": "success"}
+
+@app.put("/user/update/password", status_code=status.HTTP_200_OK)
+def update_details(token: str, old_password: str, new_password: str, db: Session = Depends(get_db)):
+    
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    user_details = get_user_details(token=token, db=db)
+    print(user_details.user_name)
+
+    statement_1 = (
+        select(models.User.user_id)
+        .join(models.Access_Token)
+        .where(
+            models.Access_Token.token == token,
+            models.User.password == old_password
+        )
+    )
+
+    try:
+        user_id = db.scalars(statement_1).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid credentials entered.")
+
+    statement_2 = (
+        update(models.User)
+        .where(models.User.user_id == user_id)
+        .values(password=new_password)
+    )
+
+    try:
+        db.execute(statement_2)
+        db.commit()
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error.")
+
+    return {"detail": "success"}
+        
     
