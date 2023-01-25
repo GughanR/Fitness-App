@@ -177,7 +177,9 @@ def update_account(full_name, email_address, user_name):
     }
     url = Url.update_account
 
-    response = requests.put(url=url) ###########
+    response = requests.put(url=url, params=get_access_token(), json=payload)
+    
+    return response
 
 def get_user_details():
     payload = {

@@ -240,7 +240,7 @@ def update_details(token: str, user: schemas.Updated_User, db: Session = Depends
     return {"detail": "success"}
 
 @app.put("/user/update/password", status_code=status.HTTP_200_OK)
-def update_details(token: str, old_password: str, new_password: str, db: Session = Depends(get_db)):
+def update_password(token: str, old_password: str, new_password: str, db: Session = Depends(get_db)):
     
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")

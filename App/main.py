@@ -78,6 +78,13 @@ class LoginScreen(Screen):
                     ) 
                 else:
                     print("logged in")
+                    # Pass user details to AccountPage
+                    try:
+                        user_details = user.get_user_details()
+                        AccountPage.user_details = user_details
+                    except Exception as e:
+                        print(e)
+                    # Change screen
                     self.manager.current = "main"
 
             except Exception as e:
@@ -260,8 +267,18 @@ class AccountPage(MDScrollView):
     dialog = None
     #verifyDialog = ObjectProperty(None)
     #codeInput = ObjectProperty(None)
+    user_details = None
 
-    # Set values for current details
+    # Set values for current details (runs if user just logged in)
+    if user_details:
+        try:
+            nameText = user_details["full_name"]
+            emailText = user_details["email_address"]
+            unText = user_details["user_name"]
+        except Exception as e:
+            print(e)
+
+    # Set values for current details (runs when user already logged in)
     try:
         user_details = user.get_user_details()
         nameText = user_details["full_name"]
@@ -270,7 +287,7 @@ class AccountPage(MDScrollView):
     except:
         nameText = ""
         emailText = ""
-        unText = ""       
+        unText = ""  
 
     def refresh(self):  # Ran when screen is refreshed
         try:
@@ -278,7 +295,8 @@ class AccountPage(MDScrollView):
             self.nameInput.text = user_details["full_name"]
             self.emailInput.text = user_details["email_address"]
             self.unInput.text = user_details["user_name"]
-        except:
+        except Exception as e:
+            print(e)
             show_dialog(self, "Connection failed")
 
     def show(self):
@@ -336,8 +354,11 @@ class AccountPage(MDScrollView):
                 ) 
                 
 
+class ChangePasswordScreen(Screen):
+    pass
+
 class FitnessApp(MDApp):
-    x = 700
+    x = 500
     Window.size = (x, x / 9 * 16)
     MDApp.title = "Fitness App"
 
@@ -357,6 +378,7 @@ class FitnessApp(MDApp):
         sm.add_widget(ForgotPasswordScreen(name="forgot"))
         sm.add_widget(VerifyUserScreen(name="verify"))
         sm.add_widget(MainScreen(name="main"))
+        sm.add_widget(ChangePasswordScreen(name="password"))
         #sm.current = "main"
 
         # Check if sign in required
