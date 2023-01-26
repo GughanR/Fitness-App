@@ -181,6 +181,18 @@ def update_account(full_name, email_address, user_name):
     
     return response
 
+def update_password(old_pw, new_pw):
+    payload = {
+        "old_password": old_pw,
+        "new_password": new_pw,
+        "token": get_access_token()["token"]
+    }
+    url = Url.update_password
+
+    response = requests.put(url=url, params=payload)
+    
+    return response
+
 def get_user_details():
     payload = {
         "token": get_access_token()["token"]

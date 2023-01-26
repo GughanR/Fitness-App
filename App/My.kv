@@ -16,6 +16,7 @@
 
 <MDLabel>:
     color: 0,0,0,1
+    font_size: app.fs_normal
 
 <MDFillRoundFlatButton>:
     md_bg_color: 0,0,0,1
@@ -34,7 +35,7 @@
     pos_hint: {"x": 0.02, "y": 0.9 }
     size_hint: 0.2, 0.05
     icon: "arrow-left"
-    icon_size: 50
+    icon_size: app.fs_normal
 
 <Background>:
     canvas:
@@ -396,8 +397,8 @@
     MDGridLayout:
         adaptive_height: True
         cols: 1
-        padding: 20, 40
-        spacing: 20
+        padding: 40, 40
+        spacing: 40
         #row_default_height: 80  
 
         AnchorLayout:  # Move button to right
@@ -407,7 +408,7 @@
                 icon: "refresh"
                 halign: "right"
                 on_release: root.refresh()
-                #icon_size: 50  
+                icon_size: app.fs_normal  
 
         MDLabel:
             text: "Account Details"
@@ -415,9 +416,7 @@
             font_size: app.fs_heading
             adaptive_height: True
 
-        #TitleLine
-        MDSeparator:
-            row_height: 10
+        MDSeparator
 
         MDTextField:
             id: nameInput
@@ -448,7 +447,7 @@
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.25}
             text: "Update Details"
-            font_size: app.fs_heading
+            font_size: app.fs_normal
             md_bg_color: 0,0,0,1
             on_release: root.update_account()
 
@@ -465,6 +464,19 @@
                 # --> MDBottomNavigationItem --> MainScreen
                 root.parent.parent.parent.parent.manager.transition.direction = "left"
                 root.parent.parent.parent.parent.manager.current = "password"
+
+        MDLabel
+        MDLabel:
+            text: "App Preferences"
+            halign: "left"
+            font_size: app.fs_heading
+            adaptive_height: True
+
+        MDSeparator
+        MDLabel:
+            text: "Put some stuff here"
+            adaptive_height: True
+        MDLabel
 
 <ChangePasswordScreen>:
 
@@ -486,8 +498,8 @@
                 root.manager.current = "main"
 
         MDTextField:
-            id: emailInput
-            hint_text: "Email Address"
+            id: oldPWInput
+            hint_text: "Old Password"
             size_hint: 0.8, 0.1
             pos_hint: {"x": 0.1, "y": 0.55}
             mode: "rectangle"
@@ -496,8 +508,8 @@
             font_size: app.fs_normal
 
         MDTextField:
-            id: unInput
-            hint_text: "Username"
+            id: newPWInput
+            hint_text: "New Password"
             size_hint: 0.8, 0.1
             pos_hint: {"x": 0.1, "y": 0.4}
             mode: "rectangle"
@@ -506,10 +518,10 @@
             font_size: app.fs_normal
 
         MDFillRoundFlatButton:
-            id: loginBtn
+            id: updateBtn
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.2}
-            #text: app.font_size
+            text: "Update"
             font_size: 50
             md_bg_color: 0,0,0,1
-            on_release: root.login()
+            on_release: root.update_account()

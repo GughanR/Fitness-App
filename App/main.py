@@ -363,18 +363,34 @@ class ChangePasswordScreen(Screen):
                 widget_object.text = ""
                 widget_object.helper_text = ""
 
+    def update_account(self):
+        old_pw = self.ids.oldPWInput.text
+        new_pw = self.ids.newPWInput.text
+
+        try:
+            response = user.update_password(old_pw, new_pw)
+            if response.status_code != 200:
+                show_dialog(
+                    self,
+                    text=json.loads(response.content.decode("utf-8"))["detail"]
+                )
+            else:
+                show_dialog(self, "Password updated")
+
+        except:
+            show_dialog(self, "Connection failed")
+
 class FitnessApp(MDApp):
 
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
-    x = 700
+    x = 550
     Window.size = (x, x / 9 * 16)
-    print(Window.size)
     MDApp.title = "Fitness App"
     # Set font sizes
     font_size_coefficient = Window.size[0]/500
     fs_title = NumericProperty(font_size_coefficient*100)
-    fs_heading = NumericProperty(font_size_coefficient*60)
+    fs_heading = NumericProperty(font_size_coefficient*55)
     fs_normal = NumericProperty(font_size_coefficient*40)
 
 
@@ -403,7 +419,8 @@ class FitnessApp(MDApp):
             sm.current = "main"
         else:
             print(False)
-        sm.current = "password"  # DEBUG
+        sm.current = "main"  # DEBUG
+        sm.screens[5].children[0].children[1].current = "Account"  # DEBUG
         return sm
 
 
