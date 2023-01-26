@@ -8,7 +8,7 @@ from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from kivy.lang import Builder
 from kivy.uix.widget import Widget, WidgetBase
 import time
@@ -29,7 +29,7 @@ from kivy.utils import get_color_from_hex
 import user
 import json
 
-Builder.load_file("My.kv")  # Load kivy file into main.py
+
 
 
 def show_dialog(self, text):
@@ -355,12 +355,28 @@ class AccountPage(MDScrollView):
                 
 
 class ChangePasswordScreen(Screen):
-    pass
+    dialog = None
+    
+    def reset_inputs(self):
+        for widget_name, widget_object in self.ids.items():
+            if "Input" in widget_name:
+                widget_object.text = ""
+                widget_object.helper_text = ""
 
 class FitnessApp(MDApp):
-    x = 500
+
+    Builder.load_file("My.kv")  # Load kivy file into main.py
+
+    x = 700
     Window.size = (x, x / 9 * 16)
+    print(Window.size)
     MDApp.title = "Fitness App"
+    # Set font sizes
+    font_size_coefficient = Window.size[0]/500
+    fs_title = NumericProperty(font_size_coefficient*100)
+    fs_heading = NumericProperty(font_size_coefficient*60)
+    fs_normal = NumericProperty(font_size_coefficient*40)
+
 
     def on_start(self):
         pass
@@ -387,7 +403,7 @@ class FitnessApp(MDApp):
             sm.current = "main"
         else:
             print(False)
-
+        sm.current = "password"  # DEBUG
         return sm
 
 

@@ -3,6 +3,7 @@
 #:import MDTextField1 kivy_modified.textfield
 # ^ USING CUSTOM DEFINED TEXTFIELD AS DEFAULT HAS A BUG
 
+# Set button/text input sizes
 #:set btnSize [0.85, 0.08]
 #:set btnX (1-btnSize[0])/2
 
@@ -12,10 +13,6 @@
 ###############
 
 ###############
-
-<Widget>:
-    font_size: 50
-
 
 <MDLabel>:
     color: 0,0,0,1
@@ -27,9 +24,11 @@
     fill_color_normal: 1,1,1,0.3
     helper_text_color_normal: 0,0,0,1
     opacity: 1
-    font_size: 40
+    font_size: app.fs_normal
     icon_left_color_normal: 0,0,0,0.6
 
+<MDTextField>:
+    font_size: app.fs_normal
 
 <BackButton@MDIconButton>:
     pos_hint: {"x": 0.02, "y": 0.9 }
@@ -102,7 +101,7 @@
             size_hint: 0.9, 0.2
             text: "AI FITNESS"
             halign: "center"
-            font_size: 100
+            font_size: app.fs_title
             color: 0,0,0,1
 
         MDLabel:
@@ -110,14 +109,14 @@
             pos_hint: {"x": 0.05, "y": 0.28}
             text: "OR"
             halign: "center"
-            font_size: 40
+            font_size: app.fs_normal
             color: (0,0,0,1)
 
         MDFillRoundFlatButton:
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.35}
             text: "Login"
-            font_size: 50
+            font_size: app.fs_normal
             on_release:
                 root.manager.transition.direction = "left"
                 root.manager.current = "login"
@@ -126,7 +125,7 @@
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.2}
             text: "Sign Up"
-            font_size: 50
+            font_size: app.fs_normal
             on_release:
                 root.manager.transition.direction = "left"
                 root.manager.current = "signup"
@@ -148,33 +147,18 @@
             size_hint: 0.6, 0.1
             allow_stretch: True
 
-        MDLabel:  # Delete
-            pos_hint: {"x": 0.05, "y": 0.55 }
-            size_hint: 0.9, 0.2
-            text: ""
-            halign: "center"
-            font_size: 100
-            color: 0,0,0,1
-
         BackButton:
             on_release:
                 root.reset_inputs()
                 root.manager.transition.direction = "right"
                 root.manager.current = "initial"
 
-        MDLabel:  # Delete
-            pos_hint: {"x": 0.05, "y": 0.7 }
-            size_hint: 0.9, 0.2
-            text: ""
-            halign: "left"
-            font_size: 150
-
         MDFillRoundFlatButton:
             id: loginBtn
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.2}
             text: "Login"
-            font_size: 50
+            font_size: app.fs_normal
             md_bg_color: 0,0,0,1
             on_release: root.login()
 
@@ -203,7 +187,7 @@
         MDFlatButton:
             size_hint: 0,0
             pos_hint: {"x": tInpX, "y": 0.33}
-            font_size: 40
+            font_size: app.fs_normal
             halign: "left"
             text: "[u]Forgot password?[/u]"
             markup: True
@@ -236,14 +220,6 @@
                 root.reset_inputs()
                 root.manager.transition.direction = "right"
                 root.manager.current = "initial"
-
-
-        MDLabel:
-            pos_hint: {"x": 0.05, "y": 0.7 }
-            size_hint: 0.9, 0.2
-            text: ""
-            halign: "left"
-            font_size: 150
 
         MDFillRoundFlatButton:
             id: createAccountBtn
@@ -326,7 +302,7 @@
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.25}
             text: "Verify"
-            font_size: 50
+            font_size: app.fs_normal
             md_bg_color: 0,0,0,1
             on_release: root.verify()
 
@@ -436,7 +412,7 @@
         MDLabel:
             text: "Account Details"
             halign: "left"
-            font_size: 60
+            font_size: app.fs_heading
             adaptive_height: True
 
         #TitleLine
@@ -472,7 +448,7 @@
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.25}
             text: "Update Details"
-            font_size: 50
+            font_size: app.fs_heading
             md_bg_color: 0,0,0,1
             on_release: root.update_account()
 
@@ -480,7 +456,7 @@
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.25}
             text: "Change Password"
-            font_size: 50
+            font_size: app.fs_normal
             md_bg_color: 0,0,0,1
             on_release: 
                 # Kivy is a frustrating language
@@ -491,72 +467,49 @@
                 root.parent.parent.parent.parent.manager.current = "password"
 
 <ChangePasswordScreen>:
-    FloatLayout:
-        Image:
-            source: "Images/dumbbell.png"
-            pos_hint: {"x": 0.2, "y": 0.7 }
-            size_hint: 0.6, 0.1
-            allow_stretch: True
 
-        MDLabel:  # Delete
-            pos_hint: {"x": 0.05, "y": 0.55 }
-            size_hint: 0.9, 0.2
-            text: ""
-            halign: "center"
-            font_size: 100
+    FloatLayout:
+
+        MDLabel:
+            pos_hint: {"x": 0.1, "y": 0.7 }
+            size_hint: 0.8, 0.2
+            text: "Change Password"
+            halign: "left"
+            valign: "top"
+            font_size: app.fs_heading
             color: 0,0,0,1
 
         BackButton:
             on_release:
                 root.reset_inputs()
                 root.manager.transition.direction = "right"
-                root.manager.current = "initial"
+                root.manager.current = "main"
 
-        MDLabel:  # Delete
-            pos_hint: {"x": 0.05, "y": 0.7 }
-            size_hint: 0.9, 0.2
-            text: ""
-            halign: "left"
-            font_size: 150
+        MDTextField:
+            id: emailInput
+            hint_text: "Email Address"
+            size_hint: 0.8, 0.1
+            pos_hint: {"x": 0.1, "y": 0.55}
+            mode: "rectangle"
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+            font_size: app.fs_normal
+
+        MDTextField:
+            id: unInput
+            hint_text: "Username"
+            size_hint: 0.8, 0.1
+            pos_hint: {"x": 0.1, "y": 0.4}
+            mode: "rectangle"
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+            font_size: app.fs_normal
 
         MDFillRoundFlatButton:
             id: loginBtn
             size_hint: btnSize
             pos_hint: {"x": btnX, "y": 0.2}
-            text: "Login"
+            #text: app.font_size
             font_size: 50
             md_bg_color: 0,0,0,1
             on_release: root.login()
-
-        MDTextFieldCustom:
-            id: unInput
-            required: True
-            size_hint: tInpSize
-            pos_hint: {"x": tInpX, "y": 0.5}
-            hint_text: "Username / Email"
-            helper_text_mode: "on_error"
-            mode: "round"
-            icon_left: "account-circle"
-
-        MDTextFieldCustom:
-            id: pwInput
-            required: True
-            size_hint: tInpSize
-            pos_hint: {"x": tInpX, "y": 0.4}
-            hint_text: "Password"
-            password: True
-            helper_text_mode: "on_error"
-            mode: "round"
-            icon_left: "key-variant"
-            icon_left_color: "Blue"
-
-        MDFlatButton:
-            size_hint: 0,0
-            pos_hint: {"x": tInpX, "y": 0.33}
-            font_size: 40
-            halign: "left"
-            text: "[u]Forgot password?[/u]"
-            markup: True
-            on_release:
-                root.manager.transition.direction = "left"
-                root.manager.current = "forgot"
