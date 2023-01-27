@@ -277,4 +277,21 @@ def update_password(token: str, old_password: str, new_password: str, db: Sessio
 
     return {"detail": "success"}
         
+@app.put("/user/logout", status_code=status.HTTP_200_OK)
+def logout(token: str, db: Session = Depends(get_db)):
     
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    statement = (
+        update(models.Access_Token)
+        .where(models.Access_Token.token == token)
+        .values(expiry_time=datetime.datetime.now())
+        )
+    try:
+        db.execute(statement)
+        db.commit()
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error.")
+    
+    return {"detail": "success"}

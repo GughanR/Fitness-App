@@ -7,7 +7,6 @@ class StrictBaseModel(BaseModel):  # https://github.com/tiangolo/fastapi/issues/
     class Config:
         extra = "forbid"
 class User(BaseModel):
-    user_id: Optional[int]
     user_name: str
     email_address: str
     password: str

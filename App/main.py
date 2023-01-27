@@ -389,7 +389,7 @@ class FitnessApp(MDApp):
     MDApp.title = "Fitness App"
     # Set font sizes
     font_size_coefficient = Window.size[0]/500
-    fs_title = NumericProperty(font_size_coefficient*100)
+    fs_title = NumericProperty(font_size_coefficient*80)
     fs_heading = NumericProperty(font_size_coefficient*55)
     fs_normal = NumericProperty(font_size_coefficient*40)
 
