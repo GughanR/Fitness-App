@@ -1,6 +1,3 @@
 {
-    "user_id": 6,
-    "token": "N2;i!P`_GzIeQ9QU,#w6.:W0JJP=--aX0e5i8UIl6=!@X\\uio]",
-    "expiry_time": "2023-01-26T23:20:39",
-    "token_id": 63
+    "detail": "Invalid credentials."
 }

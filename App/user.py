@@ -161,8 +161,11 @@ def check_access_token():
     # Check if token is valid
     token = get_access_token()
     current_time = datetime.now()
-    expiry_time = token["expiry_time"].replace("T", " ")
-    expiry_time = datetime.strptime(expiry_time, "%Y-%m-%d %H:%M:%S")
+    try:
+        expiry_time = token["expiry_time"].replace("T", " ")
+        expiry_time = datetime.strptime(expiry_time, "%Y-%m-%d %H:%M:%S")
+    except:
+        return False
 
     if current_time < expiry_time:
         return True

@@ -419,8 +419,8 @@ class FitnessApp(MDApp):
             sm.current = "main"
         else:
             print(False)
-        sm.current = "main"  # DEBUG
-        sm.screens[5].children[0].children[1].current = "Account"  # DEBUG
+        #sm.current = "main"  # DEBUG
+        #sm.screens[5].children[0].children[1].current = "Account"  # DEBUG
         return sm
 
 
