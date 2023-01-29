@@ -33,31 +33,16 @@ from kivymd.uix.list import OneLineListItem
 import user
 import json
 
+class DialogBtn(MDFlatButton):
+    pass
 class CustomDialog(MDDialog):
 
-    def __init__(self, **kwargs):  # TODO Fix this AAAAAAAAAAAAAAAAAAHHHHHHHHH!!!!!!!!!!
+    def __init__(self, **kwargs):
         self.buttons=[
-            MDFlatButton(
-                text="OK",
-                md_bg_color=[1,0,0,1],
-                font_size=MDApp.get_running_app().fs_normal,
-                on_release=self.dismiss()
-            )
+            DialogBtn(),
         ]
-        #raise ValueError
         super().__init__(**kwargs)
-
         self.open()
-
-        def close(self):
-            self.collapse()
-
-
-def show_dialog(self, text):
-    self.dialog = MDDialog(
-        text=text
-    )
-    self.dialog.open()
 
 class Background(FloatLayout):
     pass
@@ -93,10 +78,7 @@ class LoginScreen(Screen):
                 response = user.login(self.unInput.text, self.pwInput.text)
 
                 if response.status_code != 200:
-                    show_dialog(
-                        self,
-                        text=json.loads(response.content.decode("utf-8"))["detail"]
-                    ) 
+                    CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"]) 
                 else:
                     print("logged in")
                     # Pass user details to AccountPage
@@ -111,10 +93,7 @@ class LoginScreen(Screen):
                     self.manager.current = "main"
 
             except Exception as e:
-                show_dialog(
-                    self,
-                    text=str(e)
-                ) 
+                CustomDialog(text=str(e))
 
         
 
@@ -137,18 +116,11 @@ class ForgotPasswordScreen(Screen):
         try:
             response = user.reset_password(email_address)
             if response.status_code != 200:
-                show_dialog(
-                    self,
-                    text=json.loads(response.content.decode("utf-8"))["detail"]
-                ) 
+                CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"]) 
             else:
-                show_dialog(
-                    self,
-                    text="Password has been reset\n\nCheck your email"
-                ) 
+                CustomDialog(text="Password has been reset\n\nCheck your email") 
         except Exception as e:
-            show_dialog(
-                self, 
+            CustomDialog( 
                 text=str(e)
             )
             
@@ -199,8 +171,7 @@ class SignUpScreen(Screen):
                     )
 
                 if response.status_code != 200:
-                    show_dialog(
-                        self,
+                    CustomDialog(
                         text="Server error"
                     )
                 else:
@@ -213,8 +184,7 @@ class SignUpScreen(Screen):
                     self.manager.current = "verify"
 
             except:
-                show_dialog(
-                    self,
+                CustomDialog(
                     text="Connection failed"
                 )
             
@@ -252,14 +222,12 @@ class VerifyUserScreen(Screen):
                 verification_code=int(self.codeInput.text)
             )
             if response.status_code != 200:
-                show_dialog(
-                    self,
+                CustomDialog(
                     text=json.loads(response.content.decode("utf-8"))["detail"]
                 ) 
                 
             else:
-                show_dialog(
-                    self,
+                CustomDialog(
                     text="Account created\n\nPlease login"
                 ) 
                 
@@ -271,8 +239,7 @@ class VerifyUserScreen(Screen):
 
         except Exception as e:
             print(e)
-            show_dialog(
-                self,
+            CustomDialog(
                 text="Connection failed"
             ) 
             
@@ -337,10 +304,7 @@ class AccountPage(MDScrollView):
             self.unInput.text = user_details["user_name"]
         except Exception as e:
             print(e)
-            show_dialog(self, "Connection failed")
-
-    def show(self):
-        show_dialog(self, "con")
+            CustomDialog(text="Connection failed")
 
     def update_account(self):
         invalid = False
@@ -375,21 +339,18 @@ class AccountPage(MDScrollView):
                     )
 
                 if response.status_code != 200:
-                    show_dialog(
-                        self,
+                    CustomDialog(
                         text=json.loads(response.content.decode("utf-8"))["detail"]
                     )
                     
                 else:
-                    show_dialog(
-                        self,
+                    CustomDialog(
                         text="Successfully updated"
                     )
                     
 
             except:
-                show_dialog(
-                    self,
+                CustomDialog(
                     text="Connection failed"
                 ) 
     
@@ -397,8 +358,7 @@ class AccountPage(MDScrollView):
         try:
             response = user.logout()
             if response.status_code not in  (200, 403):
-                show_dialog(
-                    self, 
+                CustomDialog( 
                     text="Unable to logout"
             )
             else:
@@ -406,13 +366,12 @@ class AccountPage(MDScrollView):
                 MDApp.get_running_app().root.current = "initial"
 
         except Exception as e:
-            show_dialog(
-                self, 
+            CustomDialog( 
                 text=str(e)
             )
                 
 
-class ChangePasswordScreen(Screen):
+class ChangePasswordScreen(Screen):  #TODO add password check
     dialog = ObjectProperty(None)
     
     def reset_inputs(self):
@@ -424,7 +383,6 @@ class ChangePasswordScreen(Screen):
     def update_account(self):
         old_pw = self.ids.oldPWInput.text
         new_pw = self.ids.newPWInput.text
-        CustomDialog(text = "Y")
         try:
             response = user.update_password(old_pw, new_pw)
             if response.status_code != 200:
@@ -432,10 +390,10 @@ class ChangePasswordScreen(Screen):
                     text=json.loads(response.content.decode("utf-8"))["detail"]
                 )
             else:
-                show_dialog(self, "Password updated")
+                CustomDialog(text="Password updated")
 
         except:
-            show_dialog(self, "Connection failed")
+            CustomDialog(text="Connection failed")
 
 class FitnessApp(MDApp):
 

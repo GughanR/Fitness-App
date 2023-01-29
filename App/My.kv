@@ -74,6 +74,11 @@
             pos: self.x, self.y+50
             size: self.width, 2
 
+<DialogBtn>:
+    text: "OK"
+    font_size: app.fs_normal
+    on_release: root.parent.parent.parent.parent.dismiss()
+
 <InitialScreen>:
 
     FloatLayout:
