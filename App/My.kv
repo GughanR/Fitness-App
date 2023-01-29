@@ -397,7 +397,7 @@
     MDGridLayout:
         adaptive_height: True
         cols: 1
-        padding: 40, 40
+        padding: 40, 20
         spacing: 40
         #row_default_height: 80  
 
@@ -409,6 +409,17 @@
                 halign: "right"
                 on_release: root.refresh()
                 icon_size: app.fs_normal  
+
+        MDFillRoundFlatButton:
+            id: logoutBtn
+            size_hint: btnSize
+            pos_hint: {"x": btnX, "y": 0.25}
+            text: "Logout"
+            font_size: app.fs_normal
+            md_bg_color: 0,0,0,1
+            on_release: root.logout()
+
+        MDSeparator
 
         MDLabel:
             text: "Account Details"
@@ -473,9 +484,17 @@
             adaptive_height: True
 
         MDSeparator
-        MDLabel:
-            text: "Put some stuff here"
-            adaptive_height: True
+        MDBoxLayout:
+            padding: 0, -20
+            cols: 2
+            MDLabel:
+                text: "Weight Unit:"
+                adaptive_height: True
+            MDDropDownItem:
+                id: weightUnitDropDown
+                text: "root.weight_units"
+                font_size: app.fs_normal
+                on_release: root.show_drop_down()
         MDLabel
 
 <ChangePasswordScreen>:

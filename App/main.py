@@ -24,12 +24,33 @@ from kivymd.uix.bottomnavigation.bottomnavigation import MDBottomNavigation, MDB
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.refreshlayout import MDScrollViewRefreshLayout
 from kivy.utils import get_color_from_hex 
+from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.list import OneLineListItem
+
+
 
 
 import user
 import json
 
+class CustomDialog(MDDialog):
 
+    def __init__(self, **kwargs):  # TODO Fix this AAAAAAAAAAAAAAAAAAHHHHHHHHH!!!!!!!!!!
+        self.buttons=[
+            MDFlatButton(
+                text="OK",
+                md_bg_color=[1,0,0,1],
+                font_size=MDApp.get_running_app().fs_normal,
+                on_release=self.dismiss()
+            )
+        ]
+        #raise ValueError
+        super().__init__(**kwargs)
+
+        self.open()
+
+        def close(self):
+            self.collapse()
 
 
 def show_dialog(self, text):
@@ -81,7 +102,9 @@ class LoginScreen(Screen):
                     # Pass user details to AccountPage
                     try:
                         user_details = user.get_user_details()
-                        AccountPage.user_details = user_details
+                        AccountPage.nameText = user_details["full_name"]
+                        AccountPage.emailText = user_details["email_address"]
+                        AccountPage.unText = user_details["user_name"]
                     except Exception as e:
                         print(e)
                     # Change screen
@@ -263,20 +286,37 @@ class AccountPage(MDScrollView):
     nameInput = ObjectProperty(None)
     emailInput = ObjectProperty(None)
     unInput = ObjectProperty(None)
+    weightUnitDropDown = ObjectProperty(None)
     #pwInput = ObjectProperty(None)
     dialog = None
     #verifyDialog = ObjectProperty(None)
     #codeInput = ObjectProperty(None)
     user_details = None
 
-    # Set values for current details (runs if user just logged in)
-    if user_details:
-        try:
-            nameText = user_details["full_name"]
-            emailText = user_details["email_address"]
-            unText = user_details["user_name"]
-        except Exception as e:
-            print(e)
+    # https://www.youtube.com/watch?v=6oHfaY6p0K0
+    def show_drop_down(self):
+        self.list_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": "KG",
+                "on_release": lambda x= "KG": self.update_weight_unit("KG")
+            },
+            {
+                "viewclass": "OneLineListItem",
+                "text": "LB",
+                "on_release": lambda x = "LB": self.update_weight_unit("LB")
+            }
+        ]
+        self.drop_down = MDDropdownMenu(
+            caller=self.ids.weightUnitDropDown,
+            items=self.list_items,
+            width_mult = 2     
+        )
+        self.drop_down.open()
+
+    def update_weight_unit(self, weight_unit):
+        print(weight_unit)
+        self.drop_down.dismiss()
 
     # Set values for current details (runs when user already logged in)
     try:
@@ -352,10 +392,28 @@ class AccountPage(MDScrollView):
                     self,
                     text="Connection failed"
                 ) 
+    
+    def logout(self):
+        try:
+            response = user.logout()
+            if response.status_code not in  (200, 403):
+                show_dialog(
+                    self, 
+                    text="Unable to logout"
+            )
+            else:
+                # Open initial screen
+                MDApp.get_running_app().root.current = "initial"
+
+        except Exception as e:
+            show_dialog(
+                self, 
+                text=str(e)
+            )
                 
 
 class ChangePasswordScreen(Screen):
-    dialog = None
+    dialog = ObjectProperty(None)
     
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():
@@ -366,12 +424,11 @@ class ChangePasswordScreen(Screen):
     def update_account(self):
         old_pw = self.ids.oldPWInput.text
         new_pw = self.ids.newPWInput.text
-
+        CustomDialog(text = "Y")
         try:
             response = user.update_password(old_pw, new_pw)
             if response.status_code != 200:
-                show_dialog(
-                    self,
+                CustomDialog(
                     text=json.loads(response.content.decode("utf-8"))["detail"]
                 )
             else:
@@ -391,7 +448,7 @@ class FitnessApp(MDApp):
     font_size_coefficient = Window.size[0]/500
     fs_title = NumericProperty(font_size_coefficient*80)
     fs_heading = NumericProperty(font_size_coefficient*55)
-    fs_normal = NumericProperty(font_size_coefficient*40)
+    fs_normal = NumericProperty(font_size_coefficient*30)
 
 
     def on_start(self):

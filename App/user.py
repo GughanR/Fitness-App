@@ -93,7 +93,10 @@ def is_email(user_input):
 
 def get_access_token():
     with open("access_token.json") as json_file:
-        data = json.load(json_file)
+        try:
+            data = json.load(json_file)
+        except:
+            data = None
         return data
 
 def login(user_input, password):
@@ -205,7 +208,21 @@ def get_user_details():
     response = requests.get(url=url, params=payload)
     
     return json.loads(response.content.decode("utf-8"))
+
+def logout():
+    payload = {
+        "token": get_access_token()["token"]
+    }
+    url = Url.logout
+
+    response = requests.put(url=url, params=payload)
+
+    if response.status_code == 200 or 403:
+        # Delete contents of access_token
+        with open("access_token.json", "w+") as json_file:
+            pass
     
+    return response
 
 if __name__ == "__main__":
     print(get_user_details())

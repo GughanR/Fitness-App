@@ -17,6 +17,8 @@ class Url:
     update_account = base+"/user/update/details"
     update_password = base+"/user/update/password"
     get_user_details = base+"/user/details"
+    logout = base+"/user/logout"
+    
 
 
 if __name__ == "__main__":
