@@ -199,6 +199,16 @@ def update_password(old_pw, new_pw):
     
     return response
 
+def update_weight_unit(weight_unit):
+    payload = {
+        "unit_weight": weight_unit
+    }
+    url = Url.update_account
+
+    response = requests.put(url=url, params=get_access_token(), json=payload)
+
+    return response
+
 def get_user_details():
     payload = {
         "token": get_access_token()["token"]

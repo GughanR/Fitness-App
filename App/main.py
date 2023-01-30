@@ -87,13 +87,14 @@ class LoginScreen(Screen):
                         AccountPage.nameText = user_details["full_name"]
                         AccountPage.emailText = user_details["email_address"]
                         AccountPage.unText = user_details["user_name"]
+                        AccountPage.weightUnitDropDown.text = user_details["unit_weight"]
                     except Exception as e:
-                        print(e)
+                        pass
                     # Change screen
                     self.manager.current = "main"
 
             except Exception as e:
-                CustomDialog(text=str(e))
+                CustomDialog(text="Connection error")
 
         
 
@@ -121,7 +122,7 @@ class ForgotPasswordScreen(Screen):
                 CustomDialog(text="Password has been reset\n\nCheck your email") 
         except Exception as e:
             CustomDialog( 
-                text=str(e)
+                text="Connection error"
             )
             
 
@@ -266,6 +267,7 @@ class AccountPage(MDScrollView):
             {
                 "viewclass": "OneLineListItem",
                 "text": "KG",
+                "halign": "center",
                 "on_release": lambda x= "KG": self.update_weight_unit("KG")
             },
             {
@@ -275,15 +277,23 @@ class AccountPage(MDScrollView):
             }
         ]
         self.drop_down = MDDropdownMenu(
-            caller=self.ids.weightUnitDropDown,
+            caller=self.weightUnitDropDown,
             items=self.list_items,
             width_mult = 2     
         )
         self.drop_down.open()
 
     def update_weight_unit(self, weight_unit):
-        print(weight_unit)
+        self.weightUnitDropDown.text = weight_unit
         self.drop_down.dismiss()
+        # Update in server
+        response = user.update_weight_unit(weight_unit)
+
+        try:
+            if response.status_code != 200:
+                CustomDialog(text=response.content.decode("utf-8")["detail"])
+        except:
+            CustomDialog(text="Connection error")
 
     # Set values for current details (runs when user already logged in)
     try:
@@ -291,6 +301,8 @@ class AccountPage(MDScrollView):
         nameText = user_details["full_name"]
         emailText = user_details["email_address"]
         unText = user_details["user_name"]
+        weightUnitDropDown.text = user_details["unit_weight"]
+
     except:
         nameText = ""
         emailText = ""
@@ -302,6 +314,8 @@ class AccountPage(MDScrollView):
             self.nameInput.text = user_details["full_name"]
             self.emailInput.text = user_details["email_address"]
             self.unInput.text = user_details["user_name"]
+            self.weightUnitDropDown.text = user_details["unit_weight"]
+
         except Exception as e:
             print(e)
             CustomDialog(text="Connection failed")
@@ -367,7 +381,7 @@ class AccountPage(MDScrollView):
 
         except Exception as e:
             CustomDialog( 
-                text=str(e)
+                text="Connection error"
             )
                 
 

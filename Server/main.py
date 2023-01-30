@@ -99,7 +99,7 @@ def verify_new_user(request: schemas.User, verification_code: int, db: Session =
         email_address=request.email_address,
         password=request.password,
         full_name=request.full_name,
-        unit_weight=request.unit_weight
+        unit_weight="KG"
         )
 
     if check_verification(request.email_address, verification_code):
