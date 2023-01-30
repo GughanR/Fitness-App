@@ -397,6 +397,12 @@ class ChangePasswordScreen(Screen):  #TODO add password check
     def update_account(self):
         old_pw = self.ids.oldPWInput.text
         new_pw = self.ids.newPWInput.text
+        response = user.check_password(new_pw)
+        
+        if response != True:
+            self.ids.newPWInput.helper_text = response
+            return
+
         try:
             response = user.update_password(old_pw, new_pw)
             if response.status_code != 200:
