@@ -377,6 +377,7 @@ class AccountPage(MDScrollView):
             )
             else:
                 # Open initial screen
+                MDApp.get_running_app().root.transition.direction = "right"
                 MDApp.get_running_app().root.current = "initial"
 
         except Exception as e:
@@ -415,6 +416,10 @@ class ChangePasswordScreen(Screen):  #TODO add password check
         except:
             CustomDialog(text="Connection failed")
 
+
+class WorkoutPage(MDScrollView):
+    pass
+
 class FitnessApp(MDApp):
 
     Builder.load_file("My.kv")  # Load kivy file into main.py
@@ -427,6 +432,9 @@ class FitnessApp(MDApp):
     fs_title = NumericProperty(font_size_coefficient*80)
     fs_heading = NumericProperty(font_size_coefficient*55)
     fs_normal = NumericProperty(font_size_coefficient*30)
+
+    #Set colour
+    accent_colour = "#5542ff"
 
 
     def on_start(self):

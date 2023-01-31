@@ -379,9 +379,7 @@
             text: "Workout"
             icon: "weight-lifter"
 
-            MDLabel:
-                text: ""
-                halign: "center"
+            WorkoutPage
 
         MDBottomNavigationItem:
             name: "Account"
@@ -405,12 +403,10 @@
         cols: 1
         padding: 40, 20
         spacing: 40
-        #row_default_height: 80  
 
         AnchorLayout:  # Move button to right
             anchor_x: "right"
             MDIconButton:
-                #pos_hint: {"x": 0.78, "y": 0.9 }
                 icon: "refresh"
                 halign: "right"
                 on_release: root.refresh()
@@ -422,7 +418,7 @@
             pos_hint: {"x": btnX, "y": 0.25}
             text: "Logout"
             font_size: app.fs_normal
-            md_bg_color: 0,0,0,1
+            md_bg_color: app.accent_colour
             on_release: root.logout()
 
         MDSeparator
@@ -552,3 +548,33 @@
             font_size: 50
             md_bg_color: 0,0,0,1
             on_release: root.update_account()
+
+<WorkoutPage>:
+
+    MDGridLayout:
+
+        adaptive_height: True
+        cols: 1
+        padding: 40, 20
+        spacing: 40
+
+        AnchorLayout:  # Move button to right
+            anchor_x: "right"
+            MDIconButton:
+                icon: "refresh"
+                halign: "right"
+                #on_release: root.refresh()
+                icon_size: app.fs_normal  
+        MDLabel:
+            text: "Your Workouts"
+            halign: "center"
+            font_size: app.fs_heading
+            adaptive_height: True
+        MDSeparator
+        MDFillRoundFlatButton:
+            text: "+ New Workout"
+            font_size: app.fs_normal
+            md_bg_color: app.accent_colour
+            size_hint: btnSize
+        MDCard:
+            text: "yo"
