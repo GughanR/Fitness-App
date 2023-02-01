@@ -26,10 +26,8 @@ from kivymd.uix.refreshlayout import MDScrollViewRefreshLayout
 from kivy.utils import get_color_from_hex 
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineListItem
-
-
-
-
+import os, sys
+from kivy.resources import resource_add_path, resource_find
 import user
 import json
 
@@ -468,4 +466,6 @@ class FitnessApp(MDApp):
 
 
 if __name__ == '__main__':
+    if hasattr(sys, '_MEIPASS'):
+        resource_add_path(os.path.join(sys._MEIPASS))
     FitnessApp().run()
