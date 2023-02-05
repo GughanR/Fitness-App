@@ -62,9 +62,6 @@ class LoginScreen(Screen):
     dialog = None
 
     def login(self):
-        #
-        #self.manager.current = "main"
-        #
         empty = False
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:

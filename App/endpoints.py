@@ -9,8 +9,7 @@ def get_base_url():
 @dataclass
 class Url:
     base = get_base_url()
-    email_login = base+"/user/login/email"
-    username_login = base+"/user/login/username"
+    login = base+"/user/login"
     create_user = base+"/user/create/add"
     verify_user = base+"/user/create/verify"
     reset_password = base+"/user/login/forgot"

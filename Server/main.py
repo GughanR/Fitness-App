@@ -4,7 +4,7 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import select, update
+from sqlalchemy import select, update, and_, or_
 import random
 import json
 import string
@@ -116,27 +116,26 @@ def verify_new_user(request: schemas.User, verification_code: int, db: Session =
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect code.")
 
-@app.post("/user")
-def test2(access_token: schemas.Access_Token, db: Session = Depends(get_db)):
 
-    statement_2 = (
-        select(models.User)
-        .join(models.User.access_token)
-        .where(models.Access_Token.token_id == access_token.token_id)
-    )
-    users = db.scalars(statement_2).all()
-        
-    return users
-
-@app.get("/user/login/username", status_code=status.HTTP_200_OK)
+@app.get("/user/login", status_code=status.HTTP_200_OK)
 def user_login(username: str, password:str, db: Session = Depends(get_db)):
 
-    users = db.query(models.User).filter_by(user_name=username, password=password).all()
+    #users = db.query(models.User).filter_by(user_name=username, password=password).all()
+    statement = (
+        select(models.User)
+        .where(
+            or_(
+                models.User.user_name == username,
+                models.User.email_address == username
+                ),
+            models.User.password == password
+            )
+    )
+    try:
+        user = db.scalars(statement).one()
     
-    if len(users) != 0:
-        print(users[0].user_id)
         access_token = models.Access_Token(
-            user_id = users[0].user_id,
+            user_id = user.user_id,
             token = generate_access_token(),
             expiry_time = datetime.datetime.now() + datetime.timedelta(hours=6)
             )
@@ -146,43 +145,22 @@ def user_login(username: str, password:str, db: Session = Depends(get_db)):
             db.refresh(access_token)
         except:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Cannot create token.")
-    else:
+    except:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid credentials.")
 
     return access_token
 
-@app.get("/user/login/email", status_code=status.HTTP_200_OK)
-def user_login(email_address: str, password:str, db: Session = Depends(get_db)):
-    users = db.query(models.User).filter_by(email_address=email_address, password=password).all()
-    
-    if len(users) != 0:
-        print(users[0].user_id)
-        access_token = models.Access_Token(
-            user_id = users[0].user_id,
-            token = generate_access_token(),
-            expiry_time = datetime.datetime.now() + datetime.timedelta(hours=6)
-            )
-        try:
-            db.add(access_token)
-            db.commit()
-            db.refresh(access_token)
-        except:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Cannot create token.")
-    else:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid credentials.")
-
-    return access_token
 
 @app.post("/user/login/forgot", status_code=status.HTTP_200_OK)
 def forgot_password(email_address: str, db: Session = Depends(get_db)):
     new_password = generate_code()
-    statement_2 = (
+    statement = (
         update(models.User)
         .where(models.User.email_address == email_address)
         .values(password = new_password)
     )
     try:
-        db.execute(statement_2)
+        db.execute(statement)
         db.commit()
 
     except:
@@ -219,11 +197,8 @@ def update_details(token: str, user: schemas.Updated_User, db: Session = Depends
     for key, value in dict(user).items():
         if value:
             exec(f'user_details.{key} = value')
-
-    print(user_details.user_name)           
-
-
-    statement_2 = (
+    
+    statement = (
         update(models.User)
         .where(models.User.user_id == user_details.user_id)
         .values(
@@ -234,7 +209,7 @@ def update_details(token: str, user: schemas.Updated_User, db: Session = Depends
         )
     )
 
-    db.execute(statement_2)
+    db.execute(statement)
     db.commit()
 
     return {"detail": "success"}

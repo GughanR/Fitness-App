@@ -85,7 +85,7 @@ def check_valid_details(name, email, username, password):
         return False
 #########################################################
 
-def is_email(user_input):
+def is_email(user_input):  # TODO Delete
     if "@" in user_input:
         return True
     else:
@@ -99,19 +99,13 @@ def get_access_token():
             data = None
         return data
 
-def login(user_input, password):
+def login(username, password):
     payload = {
+        "username": username,
         "password": password
     }
+    login_url = Url.login
 
-    if is_email(user_input) == True:
-        login_url = Url.email_login
-        payload["email_address"] = user_input
-    else:
-        login_url = Url.username_login
-        payload["username"] = user_input
-
-    
     response = requests.get(url=login_url, params=payload)
     response_str = response.content.decode("utf-8") # decode bytestring and convert to json
     access_token = json.dumps(json.loads(response_str), indent=4)
