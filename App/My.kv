@@ -577,5 +577,126 @@
             font_size: app.fs_normal
             md_bg_color: app.accent_colour
             size_hint: btnSize
-        MDCard:
-            text: "yo"
+            on_release: root.new_workout()
+
+<CreateWorkoutScreen>:
+    goalDropDown: goalDropDown
+    typeDropDown: typeDropDown
+
+    MDFloatLayout:
+        BackButton:
+            on_release:
+                root.manager.transition.direction = "right"
+                root.manager.current = "main"
+        MDLabel:
+            text: "Plan Goal:"
+            size_hint: tInpSize
+            pos_hint: {"x":tInpX, "y": 0.8}
+            font_size:  app.fs_normal
+        MDDropDownItem:
+            size_hint: [0.3, 0.1]
+            pos_hint: {"x":1-0.3-tInpX, "y": 0.81}
+            id: goalDropDown
+            text: "Size"
+            font_size: app.fs_normal
+            on_release: root.show_goal_drop_down()
+        MDLabel:
+            text: "Plan Type:"
+            size_hint: tInpSize
+            pos_hint: {"x":tInpX, "y": 0.7}
+            font_size:  app.fs_normal
+        MDDropDownItem:
+            size_hint: [0.45, 0.1]
+            pos_hint: {"x":1-0.45-tInpX, "y": 0.71}
+            id: typeDropDown
+            text: "Full Body"
+            font_size: app.fs_normal
+            on_release: root.show_type_drop_down()
+        MDTextField:
+            id: planNameInput
+            hint_text: "Workout Plan Name"
+            size_hint: 0.8, 0.1
+            pos_hint: {"x": 0.1, "y": 0.55}
+            mode: "rectangle"
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+            font_size: app.fs_normal
+        MDBoxLayout:
+            pos_hint: {"x": 0.1, "y": 0.5}
+            size_hint: [0.8, 0.5]
+            spacing: 8
+            MDChip:
+                text: "Chest"
+                active: True
+            MDChip:
+                text: "Shoulders"
+                active: True
+        MDBoxLayout:
+            pos_hint: {"x": 0.1, "y": 0.45}
+            size_hint: [0.8, 0.5]
+            spacing: 8
+            MDChip:
+                text: "Triceps"
+                active: True
+            MDChip:
+                text: "Back"
+                active: True
+        MDBoxLayout:
+            pos_hint: {"x": 0.1, "y": 0.4}
+            size_hint: [0.8, 0.5]
+            spacing: 8
+            MDChip:
+                text: "Biceps"
+                active: True
+            MDChip:
+                text: "Forearms"
+                active: True
+        MDBoxLayout:
+            pos_hint: {"x": 0.1, "y": 0.35}
+            size_hint: [0.8, 0.5]
+            spacing: 8
+            MDChip:
+                text: "Quadriceps"
+                active: True
+        MDBoxLayout:
+            pos_hint: {"x": 0.1, "y": 0.3}
+            size_hint: [0.8, 0.5]
+            spacing: 8
+            MDChip:
+                text: "Glutes"
+                active: True
+            MDChip:
+                text: "Hamstrings"
+                active: True
+        MDBoxLayout:
+            pos_hint: {"x": 0.1, "y": 0.25}
+            size_hint: [0.8, 0.5]
+            spacing: 8
+            MDChip:
+                text: "Calves"
+                active: True
+            MDChip:
+                text: "Abdominals"
+                active: True
+        MDFillRoundFlatButton:
+            size_hint: btnSize
+            pos_hint: {"x": btnX, "y": 0.1}
+            text: "Create Workout Plan"
+            font_size: app.fs_normal
+            md_bg_color: app.accent_colour
+            on_release:
+                root.create_workout_plan()
+
+
+#        MDBoxLayout:
+#            padding: 0, -20
+#            cols: 2
+#            MDLabel:
+#                text: "Weight Unit:"
+#                adaptive_height: True
+#            MDDropDownItem:
+#                id: weightUnitDropDown
+#                text: "KG"
+#                font_size: app.fs_normal
+#                on_release: root.show_drop_down()
+

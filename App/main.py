@@ -23,7 +23,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.bottomnavigation.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.refreshlayout import MDScrollViewRefreshLayout
-from kivy.utils import get_color_from_hex 
+from kivy.utils import get_color_from_hex
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineListItem
 import os, sys
@@ -31,16 +31,20 @@ from kivy.resources import resource_add_path, resource_find
 import user
 import json
 
+
 class DialogBtn(MDFlatButton):
     pass
+
+
 class CustomDialog(MDDialog):
 
     def __init__(self, **kwargs):
-        self.buttons=[
+        self.buttons = [
             DialogBtn(),
         ]
         super().__init__(**kwargs)
         self.open()
+
 
 class Background(FloatLayout):
     pass
@@ -73,7 +77,7 @@ class LoginScreen(Screen):
                 response = user.login(self.unInput.text, self.pwInput.text)
 
                 if response.status_code != 200:
-                    CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"]) 
+                    CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
                 else:
                     print("logged in")
                     # Pass user details to AccountPage
@@ -90,8 +94,6 @@ class LoginScreen(Screen):
 
             except Exception as e:
                 CustomDialog(text="Connection error")
-
-        
 
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():
@@ -112,14 +114,14 @@ class ForgotPasswordScreen(Screen):
         try:
             response = user.reset_password(email_address)
             if response.status_code != 200:
-                CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"]) 
+                CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
             else:
-                CustomDialog(text="Password has been reset\n\nCheck your email") 
+                CustomDialog(text="Password has been reset\n\nCheck your email")
         except Exception as e:
-            CustomDialog( 
+            CustomDialog(
                 text="Connection error"
             )
-            
+
 
 class SignUpScreen(Screen):
     createAccountBtn = ObjectProperty(None)
@@ -128,8 +130,9 @@ class SignUpScreen(Screen):
     unInput = ObjectProperty(None)
     pwInput = ObjectProperty(None)
     dialog = None
-    #verifyDialog = ObjectProperty(None)
-    #codeInput = ObjectProperty(None)
+
+    # verifyDialog = ObjectProperty(None)
+    # codeInput = ObjectProperty(None)
 
     def create_account(self):
         invalid = False
@@ -150,7 +153,7 @@ class SignUpScreen(Screen):
 
                 if len(widget_object.text) == 0:
                     invalid = True
-                    widget_object.helper_text = widget_object.hint_text+" must not be empty"
+                    widget_object.helper_text = widget_object.hint_text + " must not be empty"
                 elif type(response) == str:
                     widget_object.helper_text = response
                     invalid = True
@@ -164,7 +167,7 @@ class SignUpScreen(Screen):
                     self.emailInput.text,
                     self.unInput.text,
                     self.pwInput.text
-                    )
+                )
 
                 if response.status_code != 200:
                     CustomDialog(
@@ -183,7 +186,6 @@ class SignUpScreen(Screen):
                 CustomDialog(
                     text="Connection failed"
                 )
-            
 
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():
@@ -193,14 +195,13 @@ class SignUpScreen(Screen):
 
 
 class VerifyUserScreen(Screen):
-
     codeInput = ObjectProperty(None)
     fullname = None
     email = None
     username = None
     password = None
     dialog = None
-    
+
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:
@@ -220,13 +221,13 @@ class VerifyUserScreen(Screen):
             if response.status_code != 200:
                 CustomDialog(
                     text=json.loads(response.content.decode("utf-8"))["detail"]
-                ) 
-                
+                )
+
             else:
                 CustomDialog(
                     text="Account created\n\nPlease login"
-                ) 
-                
+                )
+
                 self.manager.transition.direction = "left"
                 self.manager.current = "login"
 
@@ -237,12 +238,12 @@ class VerifyUserScreen(Screen):
             print(e)
             CustomDialog(
                 text="Connection failed"
-            ) 
-            
+            )
 
 
 class MainScreen(Screen):
     pass
+
 
 class AccountPage(MDScrollView):
     updateBtn = ObjectProperty(None)
@@ -250,10 +251,10 @@ class AccountPage(MDScrollView):
     emailInput = ObjectProperty(None)
     unInput = ObjectProperty(None)
     weightUnitDropDown = ObjectProperty(None)
-    #pwInput = ObjectProperty(None)
+    # pwInput = ObjectProperty(None)
     dialog = None
-    #verifyDialog = ObjectProperty(None)
-    #codeInput = ObjectProperty(None)
+    # verifyDialog = ObjectProperty(None)
+    # codeInput = ObjectProperty(None)
     user_details = None
 
     # https://www.youtube.com/watch?v=6oHfaY6p0K0
@@ -263,18 +264,18 @@ class AccountPage(MDScrollView):
                 "viewclass": "OneLineListItem",
                 "text": "KG",
                 "halign": "center",
-                "on_release": lambda x= "KG": self.update_weight_unit("KG")
+                "on_release": lambda x="KG": self.update_weight_unit("KG")
             },
             {
                 "viewclass": "OneLineListItem",
                 "text": "LB",
-                "on_release": lambda x = "LB": self.update_weight_unit("LB")
+                "on_release": lambda x="LB": self.update_weight_unit("LB")
             }
         ]
         self.drop_down = MDDropdownMenu(
             caller=self.weightUnitDropDown,
             items=self.list_items,
-            width_mult = 2     
+            width_mult=2
         )
         self.drop_down.open()
 
@@ -301,7 +302,7 @@ class AccountPage(MDScrollView):
     except:
         nameText = ""
         emailText = ""
-        unText = ""  
+        unText = ""
 
     def refresh(self):  # Ran when screen is refreshed
         try:
@@ -332,7 +333,7 @@ class AccountPage(MDScrollView):
 
                 if len(widget_object.text) == 0:
                     invalid = True
-                    widget_object.helper_text = widget_object.hint_text+" must not be empty"
+                    widget_object.helper_text = widget_object.hint_text + " must not be empty"
                 elif type(response) == str:
                     widget_object.helper_text = response
                     invalid = True
@@ -345,45 +346,45 @@ class AccountPage(MDScrollView):
                     self.nameInput.text,
                     self.emailInput.text,
                     self.unInput.text
-                    )
+                )
 
                 if response.status_code != 200:
                     CustomDialog(
                         text=json.loads(response.content.decode("utf-8"))["detail"]
                     )
-                    
+
                 else:
                     CustomDialog(
                         text="Successfully updated"
                     )
-                    
+
 
             except:
                 CustomDialog(
                     text="Connection failed"
-                ) 
-    
+                )
+
     def logout(self):
         try:
             response = user.logout()
-            if response.status_code not in  (200, 403):
-                CustomDialog( 
+            if response.status_code not in (200, 403):
+                CustomDialog(
                     text="Unable to logout"
-            )
+                )
             else:
                 # Open initial screen
                 MDApp.get_running_app().root.transition.direction = "right"
                 MDApp.get_running_app().root.current = "initial"
 
         except Exception as e:
-            CustomDialog( 
+            CustomDialog(
                 text="Connection error"
             )
-                
 
-class ChangePasswordScreen(Screen):  #TODO add password check
+
+class ChangePasswordScreen(Screen):  # TODO add password check
     dialog = ObjectProperty(None)
-    
+
     def reset_inputs(self):
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:
@@ -394,7 +395,7 @@ class ChangePasswordScreen(Screen):  #TODO add password check
         old_pw = self.ids.oldPWInput.text
         new_pw = self.ids.newPWInput.text
         response = user.check_password(new_pw)
-        
+
         if response != True:
             self.ids.newPWInput.helper_text = response
             return
@@ -413,24 +414,84 @@ class ChangePasswordScreen(Screen):  #TODO add password check
 
 
 class WorkoutPage(MDScrollView):
-    pass
+    def new_workout(self):
+        MDApp.get_running_app().root.transition.direction = "left"
+        MDApp.get_running_app().root.current = "create_workout"
+
+
+class CreateWorkoutScreen(Screen):
+    goalDropDown = ObjectProperty(None)
+    def show_goal_drop_down(self):
+        self.list_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Size",
+                "halign": "center",
+                "on_release": lambda x="Size": self.update_goal("Size")
+            },
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Strength",
+                "on_release": lambda x="Strength": self.update_goal("Strength")
+            }
+        ]
+        self.drop_down = MDDropdownMenu(
+            caller=self.goalDropDown,
+            items=self.list_items,
+            width_mult=2
+        )
+        self.drop_down.open()
+
+    def update_goal(self, text):
+        self.goalDropDown.text = text
+        self.drop_down.dismiss()
+
+    def show_type_drop_down(self):
+        self.list_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Full Body",
+                "halign": "center",
+                "on_release": lambda x="Full Body": self.update_type("Full Body")
+            },
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Upper Lower",
+                "on_release": lambda x="Upper Lower": self.update_type("Upper Lower")
+            },
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Push Pull Legs",
+                "on_release": lambda x="Push Pull Legs": self.update_type("Push Pull Legs")
+            }
+        ]
+        self.drop_down = MDDropdownMenu(
+            caller=self.goalDropDown,
+            items=self.list_items,
+            width_mult=3
+        )
+        self.drop_down.open()
+    def update_type(self, text):
+        self.typeDropDown.text = text
+        self.drop_down.dismiss()
+
+    def create_workout_plan(self):
+        print("Creatin")
 
 class FitnessApp(MDApp):
-
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
-    x = 550
+    x = 500
     Window.size = (x, x / 9 * 16)
     MDApp.title = "Fitness App"
     # Set font sizes
-    font_size_coefficient = Window.size[0]/500
-    fs_title = NumericProperty(font_size_coefficient*80)
-    fs_heading = NumericProperty(font_size_coefficient*55)
-    fs_normal = NumericProperty(font_size_coefficient*30)
+    font_size_coefficient = Window.size[0] / 500
+    fs_title = NumericProperty(font_size_coefficient * 80)
+    fs_heading = NumericProperty(font_size_coefficient * 55)
+    fs_normal = NumericProperty(font_size_coefficient * 30)
 
-    #Set colour
+    # Set colour
     accent_colour = "#5542ff"
-
 
     def on_start(self):
         pass
@@ -439,7 +500,7 @@ class FitnessApp(MDApp):
         # Add screens to screen manager
         self.theme_cls.primary_palette = "DeepPurple"
         self.theme_cls.accent_palette = "DeepPurple"
-        #self.theme_cls.bg_dark = get_color_from_hex("#8c78ff")
+        # self.theme_cls.bg_dark = get_color_from_hex("#8c78ff")
         self.theme_cls.theme_style = "Light"
         sm = ScreenManager(transition=SlideTransition())
         sm.add_widget(InitialScreen(name="initial"))
@@ -449,16 +510,17 @@ class FitnessApp(MDApp):
         sm.add_widget(VerifyUserScreen(name="verify"))
         sm.add_widget(MainScreen(name="main"))
         sm.add_widget(ChangePasswordScreen(name="password"))
-        #sm.current = "main"
+        sm.add_widget(CreateWorkoutScreen(name="create_workout"))
+        # sm.current = "main"
 
         # Check if sign in required
         if user.check_access_token():
             print(True)
-            sm.current = "main"
+            sm.current = "create_workout"
         else:
             print(False)
-        #sm.current = "main"  # DEBUG
-        #sm.screens[5].children[0].children[1].current = "Account"  # DEBUG
+        # sm.current = "main"  # DEBUG
+        # sm.screens[5].children[0].children[1].current = "Account"  # DEBUG
         return sm
 
 
