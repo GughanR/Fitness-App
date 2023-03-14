@@ -30,6 +30,7 @@ import os, sys
 from kivy.resources import resource_add_path, resource_find
 import user
 import json
+import workout
 
 
 class DialogBtn(MDFlatButton):
@@ -421,6 +422,7 @@ class WorkoutPage(MDScrollView):
 
 class CreateWorkoutScreen(Screen):
     goalDropDown = ObjectProperty(None)
+    typeDropDown = ObjectProperty(None)
     def show_goal_drop_down(self):
         self.list_items = [
             {
@@ -476,12 +478,26 @@ class CreateWorkoutScreen(Screen):
         self.drop_down.dismiss()
 
     def create_workout_plan(self):
-        print("Creatin")
+        # Check exercises are compatible with plan type
+        # First get muscles chosen into list
+        muscles_chosen = []
+        for widget_name, widget_object in self.ids.items():
+            if "chip" in widget_name:
+                if widget_object.active:
+                    muscles_chosen.append(widget_object.text.lower())
+        valid = workout.check_plan_type(self.typeDropDown.text.lower(), muscles_chosen)
+        if not valid:
+            CustomDialog(text="Invalid Plan Type and Muscles combination")
+            return
+        print(self.ids.planNameInput.text)
+        print(self.goalDropDown.text)
+        print(self.typeDropDown.text)
+
 
 class FitnessApp(MDApp):
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
-    x = 500
+    x = 700
     Window.size = (x, x / 9 * 16)
     MDApp.title = "Fitness App"
     # Set font sizes
@@ -515,7 +531,6 @@ class FitnessApp(MDApp):
 
         # Check if sign in required
         if user.check_access_token():
-            print(True)
             sm.current = "create_workout"
         else:
             print(False)

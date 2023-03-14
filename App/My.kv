@@ -31,6 +31,9 @@
 <MDTextField>:
     font_size: app.fs_normal
 
+<MDChip>:
+    adaptive_size: True
+
 <BackButton@MDIconButton>:
     pos_hint: {"x": 0.02, "y": 0.9 }
     size_hint: 0.2, 0.05
@@ -626,9 +629,12 @@
             size_hint: [0.8, 0.5]
             spacing: 8
             MDChip:
+                id: chip0
                 text: "Chest"
                 active: True
+                padding_y: 100
             MDChip:
+                id: chip1
                 text: "Shoulders"
                 active: True
         MDBoxLayout:
@@ -636,9 +642,11 @@
             size_hint: [0.8, 0.5]
             spacing: 8
             MDChip:
+                id: chip2
                 text: "Triceps"
                 active: True
             MDChip:
+                id: chip3
                 text: "Back"
                 active: True
         MDBoxLayout:
@@ -646,9 +654,11 @@
             size_hint: [0.8, 0.5]
             spacing: 8
             MDChip:
+                id: chip4
                 text: "Biceps"
                 active: True
             MDChip:
+                id: chip5
                 text: "Forearms"
                 active: True
         MDBoxLayout:
@@ -656,31 +666,29 @@
             size_hint: [0.8, 0.5]
             spacing: 8
             MDChip:
+                id: chip6
                 text: "Quadriceps"
+                active: True
+            MDChip:
+                id: chip7
+                text: "Calves"
                 active: True
         MDBoxLayout:
             pos_hint: {"x": 0.1, "y": 0.3}
             size_hint: [0.8, 0.5]
             spacing: 8
             MDChip:
+                id: chip8
                 text: "Glutes"
                 active: True
             MDChip:
+                id: chip9
                 text: "Hamstrings"
                 active: True
-        MDBoxLayout:
-            pos_hint: {"x": 0.1, "y": 0.25}
-            size_hint: [0.8, 0.5]
-            spacing: 8
-            MDChip:
-                text: "Calves"
-                active: True
-            MDChip:
-                text: "Abdominals"
-                active: True
+
         MDFillRoundFlatButton:
             size_hint: btnSize
-            pos_hint: {"x": btnX, "y": 0.1}
+            pos_hint: {"x": btnX, "y": 0.15}
             text: "Create Workout Plan"
             font_size: app.fs_normal
             md_bg_color: app.accent_colour

@@ -27,7 +27,7 @@ def check_plan_type(plan_type, muscles_chosen):
         for muscle in muscle_group:
             if muscle in muscles_chosen:
                 group_valid = True
-        if group_valid == False:
+        if not group_valid:
             all_valid = False
 
     return all_valid
