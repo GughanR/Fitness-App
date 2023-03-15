@@ -585,6 +585,7 @@
 <CreateWorkoutScreen>:
     goalDropDown: goalDropDown
     typeDropDown: typeDropDown
+    numOfDaysInput: numOfDaysInput
 
     MDFloatLayout:
         BackButton:
@@ -606,15 +607,27 @@
         MDLabel:
             text: "Plan Type:"
             size_hint: tInpSize
-            pos_hint: {"x":tInpX, "y": 0.7}
+            pos_hint: {"x":tInpX, "y": 0.73}
             font_size:  app.fs_normal
         MDDropDownItem:
             size_hint: [0.45, 0.1]
-            pos_hint: {"x":1-0.45-tInpX, "y": 0.71}
+            pos_hint: {"x":1-0.45-tInpX, "y": 0.74}
             id: typeDropDown
             text: "Full Body"
             font_size: app.fs_normal
             on_release: root.show_type_drop_down()
+        MDLabel:
+            text: "Number of Days:"
+            size_hint: tInpSize
+            pos_hint: {"x":tInpX, "y": 0.66}
+            font_size:  app.fs_normal
+        MDTextField:
+            id: numOfDaysInput
+            size_hint: 0.3, tInpSize[1]
+            pos_hint: {"x": 0.6, "y": 0.66}
+            mode: "rectangle"
+            halign: "center"
+            font_size: app.fs_normal
         MDTextField:
             id: planNameInput
             hint_text: "Workout Plan Name"
@@ -679,10 +692,6 @@
             spacing: 8
             MDChip:
                 id: chip8
-                text: "Glutes"
-                active: True
-            MDChip:
-                id: chip9
                 text: "Hamstrings"
                 active: True
 

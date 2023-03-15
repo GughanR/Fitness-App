@@ -1,12 +1,11 @@
 import json
-from dataclasses import dataclass
 
 def get_base_url():
     with open("server.json") as json_file:
         data = json.load(json_file)
         return data["base_url"]
 
-@dataclass
+
 class Url:
     base = get_base_url()
     login = base+"/user/login"
@@ -17,6 +16,8 @@ class Url:
     update_password = base+"/user/update/password"
     get_user_details = base+"/user/details"
     logout = base+"/user/logout"
+
+    get_exercises = base+"/exercises"
     
 
 

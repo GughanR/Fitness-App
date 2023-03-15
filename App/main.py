@@ -423,6 +423,8 @@ class WorkoutPage(MDScrollView):
 class CreateWorkoutScreen(Screen):
     goalDropDown = ObjectProperty(None)
     typeDropDown = ObjectProperty(None)
+    numOfDaysInput = ObjectProperty(None)
+
     def show_goal_drop_down(self):
         self.list_items = [
             {
@@ -473,6 +475,7 @@ class CreateWorkoutScreen(Screen):
             width_mult=3
         )
         self.drop_down.open()
+
     def update_type(self, text):
         self.typeDropDown.text = text
         self.drop_down.dismiss()
@@ -489,6 +492,18 @@ class CreateWorkoutScreen(Screen):
         if not valid:
             CustomDialog(text="Invalid Plan Type and Muscles combination")
             return
+
+        # Check num of days chosen is valid
+        try:
+            days_input = int(self.numOfDaysInput.text)
+        except ValueError:
+            days_input = 0
+        days_valid = workout.check_num_of_days(self.typeDropDown.text.lower(), days_input)
+        if not days_valid[0]:
+            CustomDialog(text=f"Number of days must be at least {days_valid[1]}")
+            return
+
+        # Create workout plan
         print(self.ids.planNameInput.text)
         print(self.goalDropDown.text)
         print(self.typeDropDown.text)

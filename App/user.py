@@ -5,6 +5,7 @@ import json
 from endpoints import Url
 from datetime import datetime
 
+
 def check_name(name):
     alphabet = list(string.ascii_letters)
     for char in name:
@@ -13,22 +14,24 @@ def check_name(name):
                 return "Name must only contain alphabetical characters"
     return True
 
+
 def check_email(email):
     alphabet = list(string.ascii_letters)
     digits = "1234567890"
     digits = list(digits)
     email_valid_char = [
-        "!", "#", "$", "%", "&", "'"," *", "+", "-", "@",
+        "!", "#", "$", "%", "&", "'", " *", "+", "-", "@",
         "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."
-        ]
+    ]
     for char in email:
         if char not in (alphabet + digits + email_valid_char):
             return "Invalid character(s)"
-    num_of_ats = email.count("@")    
+    num_of_ats = email.count("@")
     num_of_dots = email.count(".")
     if num_of_ats != 1 or num_of_dots == 0:
         return "Email must only contain one '@' and at least one '.'"
     return True
+
 
 def check_username(username):
     alphabet = list(string.ascii_letters)
@@ -36,6 +39,7 @@ def check_username(username):
         if char not in alphabet:
             return "Username must only contain alphabetical characters"
     return True
+
 
 def check_password(password):
     digits = "1234567890"
@@ -49,6 +53,7 @@ def check_password(password):
         return "Password must contain a number"
     return True
 
+
 #########################################################
 def check_valid_details(name, email, username, password):
     alphabet = list(string.ascii_letters)
@@ -56,25 +61,25 @@ def check_valid_details(name, email, username, password):
         if char not in alphabet:
             if ((char != " ") and (char != "'")):
                 return {""}
-    
+
     digits = "1234567890"
     digits = list(digits)
     email_valid_char = [
-        "!", "#", "$", "%", "&", "'"," *", "+", "-", 
+        "!", "#", "$", "%", "&", "'", " *", "+", "-",
         "/", "=", "?", "^", "_", "`", "{", "|", "}", "~"
-        ]
+    ]
     for char in email:
         if char in (alphabet + digits + email_valid_char):
             return False
-    num_of_ats = email.count("@")    
+    num_of_ats = email.count("@")
     num_of_dots = email.count(".")
     if num_of_ats != 1 or num_of_dots == 0:
         return False
-    
+
     for char in username:
         if char not in alphabet:
             return False
-    
+
     if len(password) < 8:
         return False
     contains_number = False
@@ -83,6 +88,8 @@ def check_valid_details(name, email, username, password):
             contains_number = True
     if contains_number == False:
         return False
+
+
 #########################################################
 
 def is_email(user_input):  # TODO Delete
@@ -90,6 +97,7 @@ def is_email(user_input):  # TODO Delete
         return True
     else:
         return False
+
 
 def get_access_token():
     with open("access_token.json") as json_file:
@@ -99,6 +107,7 @@ def get_access_token():
             data = None
         return data
 
+
 def login(username, password):
     payload = {
         "username": username,
@@ -107,15 +116,16 @@ def login(username, password):
     login_url = Url.login
 
     response = requests.get(url=login_url, params=payload)
-    response_str = response.content.decode("utf-8") # decode bytestring and convert to json
+    response_str = response.content.decode("utf-8")  # decode bytestring and convert to json
     access_token = json.dumps(json.loads(response_str), indent=4)
 
     with open("access_token.json", "w+") as json_file:
         json_file.write(access_token)
 
     return response
-    
-def create_account(full_name, email_address, user_name,  password):
+
+
+def create_account(full_name, email_address, user_name, password):
     payload = {
         "full_name": full_name,
         "email_address": email_address,
@@ -128,7 +138,8 @@ def create_account(full_name, email_address, user_name,  password):
 
     return response
 
-def verify(full_name, email_address, user_name,  password, verification_code):
+
+def verify(full_name, email_address, user_name, password, verification_code):
     payload = {
         "full_name": full_name,
         "email_address": email_address,
@@ -143,7 +154,8 @@ def verify(full_name, email_address, user_name,  password, verification_code):
     response = requests.post(url=url, params=code, json=payload)
 
     return response
-    
+
+
 def reset_password(email_address):
     payload = {
         "email_address": email_address
@@ -153,6 +165,7 @@ def reset_password(email_address):
     response = requests.post(url=url, params=payload)
 
     return response
+
 
 def check_access_token():
     # Check if token is valid
@@ -169,6 +182,7 @@ def check_access_token():
     else:
         return False
 
+
 def update_account(full_name, email_address, user_name):
     payload = {
         "full_name": full_name,
@@ -178,8 +192,9 @@ def update_account(full_name, email_address, user_name):
     url = Url.update_account
 
     response = requests.put(url=url, params=get_access_token(), json=payload)
-    
+
     return response
+
 
 def update_password(old_pw, new_pw):
     payload = {
@@ -190,8 +205,9 @@ def update_password(old_pw, new_pw):
     url = Url.update_password
 
     response = requests.put(url=url, params=payload)
-    
+
     return response
+
 
 def update_weight_unit(weight_unit):
     payload = {
@@ -203,6 +219,7 @@ def update_weight_unit(weight_unit):
 
     return response
 
+
 def get_user_details():
     payload = {
         "token": get_access_token()["token"]
@@ -210,8 +227,9 @@ def get_user_details():
     url = Url.get_user_details
 
     response = requests.get(url=url, params=payload)
-    
+
     return json.loads(response.content.decode("utf-8"))
+
 
 def logout():
     payload = {
@@ -225,8 +243,9 @@ def logout():
         # Delete contents of access_token
         with open("access_token.json", "w+") as json_file:
             pass
-    
+
     return response
+
 
 if __name__ == "__main__":
     print(get_user_details())
