@@ -2,6 +2,8 @@ import user
 from endpoints import Url
 import requests
 import json
+import string
+from user import get_access_token, get_user_details
 
 
 class WorkoutPlan:
@@ -14,6 +16,18 @@ class WorkoutPlan:
         self.workout_plan_goal = data.get("workout_plan_goal")
         self.workout_list = data.get("workout_list", [])
         self.last_workout = data.get("last_workout")
+
+    def save_new_plan(self):
+        # Save new plan in database
+        payload = convert_to_json(self)
+        token = {
+            "token": get_access_token()["token"]
+        }
+        url = Url.add_workout_plan
+
+        response = requests.post(url=url, json=payload, params=token)
+
+        return response
 
 
 class Exercise:
@@ -28,6 +42,7 @@ class Exercise:
         self.muscle_subgroup = data.get("muscle_subgroup")
         self.compound = data.get("compound")
         self.completed = data.get("completed")
+        self.workout_exercise_number = data.get("workout_exercise_number")
 
 
 class Workout:
@@ -54,13 +69,35 @@ def convert_to_json(py_obj):  # TODO: Document this algorithm
     return json_data
 
 
+def check_plan_name(name):
+    alphabet = list(string.ascii_letters)
+    digits = "1234567890"
+    digits = list(digits)
+    email_valid_char = [
+        "!", "#", "$", "%", "&", "'", " *", "+", "-", "@",
+        "/", "=", "?", "^", "_", "`", "{", "|", "}", "~", "."
+    ]
+    contains_char = False
+    for char in name:
+        if char == " ":
+            continue
+        elif char not in (alphabet + digits + email_valid_char):
+            return "Invalid character(s) in plan name"
+        else:
+            contains_char = True
+
+    if not contains_char:
+        return "A plan name must be entered"
+
+    return True
+
+
 
 def get_exercises():
-    token = user.get_access_token()
-    payload = {
-        "token": token["token"]
+    token = {
+        "token": get_access_token()["token"]
     }
-    response = requests.get(url=Url.get_exercises, params=payload)
+    response = requests.get(url=Url.get_exercises, params=token)
 
     return response
 
@@ -153,10 +190,13 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
         exercise_muscles = [push_muscles + pull_muscles + leg_muscles]
 
     # Filter muscle groups
+    filtered_exercise_muscles = []
     for muscle_group in exercise_muscles:
+        filtered_muscle_group = []
         for muscle in muscle_group:
-            if muscle not in muscles_chosen:
-                muscle_group.remove(muscle)
+            if muscle in muscles_chosen:
+                filtered_muscle_group.append(muscle)
+        filtered_exercise_muscles.append(filtered_muscle_group)
 
     # Create queues
     muscle_subgroups_dict = get_muscles(exercises)
@@ -172,8 +212,8 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
     workout_plan = WorkoutPlan()
     for day_no in range(num_of_days):
         workout = Workout()
-        n = day_no % len(exercise_muscles)
-        potential_muscles = exercise_muscles[n]
+        n = day_no % len(filtered_exercise_muscles)
+        potential_muscles = filtered_exercise_muscles[n]
         selected_exercises = []
 
         for muscle_group in potential_muscles:
@@ -194,9 +234,13 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
                     # Move exercise to front
                     selected_exercises.insert(0, selected_exercises.pop(i))
 
+            # Set number of each exercise
+            for i, exercise in enumerate(selected_exercises):
+                exercise.workout_exercise_number = i
+
         # Save workout object details
-        workout.workout_number = day_no+1
-        workout.workout_name = f"Workout {day_no+1}"
+        workout.workout_number = day_no
+        workout.workout_name = f"Workout {day_no}"
         workout.exercise_list = selected_exercises
         # Append workout object to workout_plan object's list
         workout_plan.workout_list.append(workout)
@@ -206,13 +250,12 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
     workout_plan.workout_plan_name = str(plan_name)
     workout_plan.workout_plan_type = str(plan_type).lower()
 
-    a = json.dumps(convert_to_json(workout_plan), indent=4)
-    print(a)
+    return workout_plan
 
 
 if __name__ == "__main__":
-    create_workout_plan(1,
+    print(create_workout_plan(1,
                         ["chest", "triceps", "shoulders", "back", "forearms", "quadriceps", "hamstrings", "calves"],
                         "push pull legs",
                         1,
-                        3)
+                        3))

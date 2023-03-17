@@ -190,8 +190,11 @@ def update_account(full_name, email_address, user_name):
         "user_name": user_name
     }
     url = Url.update_account
+    token = {
+        "token": get_access_token()["token"]
+    }
 
-    response = requests.put(url=url, params=get_access_token(), json=payload)
+    response = requests.put(url=url, params=token, json=payload)
 
     return response
 
@@ -214,8 +217,11 @@ def update_weight_unit(weight_unit):
         "unit_weight": weight_unit
     }
     url = Url.update_account
+    token = {
+        "token": get_access_token()["token"]
+    }
 
-    response = requests.put(url=url, params=get_access_token(), json=payload)
+    response = requests.put(url=url, params=token, json=payload)
 
     return response
 

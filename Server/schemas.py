@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import datetime
 
 
@@ -16,14 +16,14 @@ class User(BaseModel):
     unit_weight: Optional[str]
 
 
-class Access_Token(BaseModel):
+class AccessToken(BaseModel):
     token_id: Optional[int]
     user_id: Optional[int]
     token: str
     expiry_time: datetime.datetime
 
 
-class Updated_User(StrictBaseModel):
+class UpdatedUser(StrictBaseModel):
     user_name: Optional[str]
     email_address: Optional[str]
     full_name: Optional[str]
@@ -39,3 +39,20 @@ class Exercise(BaseModel):
     muscle_subgroup: str
     compound: bool
     completed: Optional[bool]
+    workout_exercise_number: int
+
+
+class Workout(BaseModel):
+    workout_id: Optional[int]
+    workout_number: int
+    workout_name: str
+    exercise_list: List[Exercise]
+
+
+class WorkoutPlan(BaseModel):
+    workout_plan_id: Optional[int]
+    workout_plan_name: str
+    workout_plan_type: str
+    workout_plan_goal: str
+    workout_list: List[Workout]
+    last_workout: Optional[int]

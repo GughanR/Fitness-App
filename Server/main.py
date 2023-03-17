@@ -58,8 +58,8 @@ def generate_access_token():
 def check_valid_token(db, token):
     try:
         statement_2 = (
-            select(models.Access_Token.expiry_time)
-            .where(models.Access_Token.token == token)
+            select(models.AccessToken.expiry_time)
+            .where(models.AccessToken.token == token)
         )
         expiry_time = db.scalars(statement_2).one()
 
@@ -137,7 +137,7 @@ def user_login(username: str, password: str, db: Session = Depends(get_db)):
     try:
         user = db.scalars(statement).one()
 
-        access_token = models.Access_Token(
+        access_token = models.AccessToken(
             user_id=user.user_id,
             token=generate_access_token(),
             expiry_time=datetime.datetime.now() + datetime.timedelta(hours=6)
@@ -179,7 +179,7 @@ def get_user_details(token: str, db: Session = Depends(get_db)):
     statement_2 = (
         select(models.User)
         .join(models.User.access_token)
-        .where(models.Access_Token.token == token)
+        .where(models.AccessToken.token == token)
     )
     try:
         user = db.scalars(statement_2).one()
@@ -190,7 +190,7 @@ def get_user_details(token: str, db: Session = Depends(get_db)):
 
 
 @app.put("/user/update/details", status_code=status.HTTP_200_OK)
-def update_details(token: str, user: schemas.Updated_User, db: Session = Depends(get_db)):
+def update_details(token: str, user: schemas.UpdatedUser, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
 
@@ -228,9 +228,9 @@ def update_password(token: str, old_password: str, new_password: str, db: Sessio
 
     statement_1 = (
         select(models.User.user_id)
-        .join(models.Access_Token)
+        .join(models.AccessToken)
         .where(
-            models.Access_Token.token == token,
+            models.AccessToken.token == token,
             models.User.password == old_password
         )
     )
@@ -262,8 +262,8 @@ def logout(token: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
 
     statement = (
-        update(models.Access_Token)
-        .where(models.Access_Token.token == token)
+        update(models.AccessToken)
+        .where(models.AccessToken.token == token)
         .values(expiry_time=datetime.datetime.now())
     )
     try:
@@ -288,3 +288,68 @@ def get_exercises(token: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return exercises
+
+
+@app.post("/workout/plan/add", status_code=status.HTTP_200_OK)
+def add_workout_plan(token: str, workout_plan: schemas.WorkoutPlan, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    statement = (
+        select(models.User.user_id)
+        .join(models.AccessToken)
+        .where(models.AccessToken.token == token)
+    )
+    try:
+        # Get user id
+        user_id = db.scalars(statement).one()
+        # Add workout plan details
+        statement = (
+            update(models.WorkoutPlan)
+            .where(models.WorkoutPlan.user_id == user_id)
+            .values(
+                user_id=user_id,
+                workout_plan_name=workout_plan.workout_plan_name,
+                workout_plan_type=workout_plan.workout_plan_type,
+                workout_plan_goal=workout_plan.workout_plan_goal
+            )
+        )
+        new_workout_plan = models.WorkoutPlan(
+            user_id=user_id,
+            workout_plan_name=workout_plan.workout_plan_name,
+            workout_plan_type=workout_plan.workout_plan_type,
+            workout_plan_goal=workout_plan.workout_plan_goal
+        )
+        db.add(new_workout_plan)
+        db.commit()
+        db.refresh(new_workout_plan)
+
+        # Add each workout
+        for workout in workout_plan.workout_list:
+            new_workout = models.Workout(
+                workout_plan_id=new_workout_plan.workout_plan_id,
+                workout_number=workout.workout_number,
+                workout_name=workout.workout_name
+            )
+            db.add(new_workout)
+            db.commit()
+            db.refresh(new_workout)
+            # Add each exercise
+            for exercise in workout.exercise_list:
+                new_exercise = models.WorkoutExercise(
+                    workout_id=new_workout.workout_id,
+                    exercise_id=exercise.exercise_id,
+                    workout_exercise_number=exercise.workout_exercise_number
+                )
+                db.add(new_exercise)
+                db.commit()
+                db.refresh(new_exercise)
+                print(new_exercise.workout_exercise_id)
+
+        return {"detail": "success"}
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return user_id

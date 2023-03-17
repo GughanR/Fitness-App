@@ -18,6 +18,7 @@ class Url:
     logout = base+"/user/logout"
 
     get_exercises = base+"/exercises"
+    add_workout_plan = base+"/workout/plan/add"
     
 
 

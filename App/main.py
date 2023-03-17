@@ -503,10 +503,27 @@ class CreateWorkoutScreen(Screen):
             CustomDialog(text=f"Number of days must be at least {days_valid[1]}")
             return
 
+        # Check plan name is valid
+        valid = workout.check_plan_name(self.ids.planNameInput.text)
+        if type(valid) == str:
+            CustomDialog(text=valid)
+            return
+
         # Create workout plan
         print(self.ids.planNameInput.text)
         print(self.goalDropDown.text)
         print(self.typeDropDown.text)
+        new_workout_plan = workout.create_workout_plan(
+            plan_goal=self.goalDropDown.text.lower(),
+            muscles_chosen=muscles_chosen,
+            plan_type=self.typeDropDown.text.lower(),
+            plan_name=self.ids.planNameInput.text,
+            num_of_days=int(self.ids.numOfDaysInput.text)
+        )
+        # TODO: Show user plan before saving
+        response = new_workout_plan.save_new_plan()
+        if response.status_code != 200:
+            CustomDialog(text=str(json.loads(response.content.decode("utf-8"))["detail"]))
 
 
 class FitnessApp(MDApp):
