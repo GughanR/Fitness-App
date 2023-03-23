@@ -274,6 +274,7 @@ def logout(token: str, db: Session = Depends(get_db)):
 
     return {"detail": "success"}
 
+
 @app.get("/exercises", status_code=status.HTTP_200_OK)
 def get_exercises(token: str, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
@@ -353,3 +354,81 @@ def add_workout_plan(token: str, workout_plan: schemas.WorkoutPlan, db: Session 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return user_id
+
+
+@app.get("/workout-plan", status_code=status.HTTP_200_OK)
+def get_workout_plans(token: str, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    statement = (
+        select(models.WorkoutPlan)
+        .join(models.User)
+        .join(models.AccessToken)
+        .where(models.AccessToken.token == token)
+    )
+    try:
+        workout_plans = db.scalars(statement).all()
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return workout_plans
+
+
+@app.get("/workout", status_code=status.HTTP_200_OK)
+def get_workout_plans(token: str, workout_plan_id: int, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    statement = (
+        select(models.Workout)
+        .join(models.WorkoutPlan)
+        .join(models.User)
+        .join(models.AccessToken)
+        .where(
+            models.Workout.workout_plan_id == workout_plan_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        workout_plans = db.scalars(statement).all()
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return workout_plans
+
+
+@app.get("/workout-exercise", status_code=status.HTTP_200_OK)
+def get_workout_exercises(token: str, workout_id: int, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    statement = (
+        select(
+            models.Exercise.exercise_id,
+            models.Exercise.exercise_name,
+            models.Exercise.min_reps,
+            models.Exercise.max_reps,
+            models.Exercise.muscle_group,
+            models.Exercise.muscle_subgroup,
+            models.Exercise.compound,
+            models.WorkoutExercise.workout_exercise_id,
+            models.WorkoutExercise.workout_exercise_number
+        )
+        .join(models.WorkoutExercise)
+        .join(models.Workout)
+        .join(models.WorkoutPlan)
+        .join(models.User)
+        .join(models.AccessToken)
+        .where(
+            models.WorkoutExercise.workout_id == workout_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        workout_exercises = db.execute(statement).all()
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return workout_exercises

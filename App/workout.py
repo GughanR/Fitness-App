@@ -35,6 +35,7 @@ class Exercise:
         # Given dictionary will be used to add attributes
         # If no dict given then default dict will be empty
         self.exercise_id = data.get("exercise_id")
+        self.workout_exercise_id = data.get("exercise_id")
         self.exercise_name = data.get("exercise_name")
         self.min_reps = data.get("min_reps")
         self.max_reps = data.get("max_reps")

@@ -523,7 +523,7 @@ class CreateWorkoutScreen(Screen):
         # TODO: Show user plan before saving
         response = new_workout_plan.save_new_plan()
         if response.status_code != 200:
-            CustomDialog(text=str(json.loads(response.content.decode("utf-8"))["detail"]))
+            CustomDialog(text="Connection failed")
 
 
 class FitnessApp(MDApp):
