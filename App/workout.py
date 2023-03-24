@@ -69,6 +69,46 @@ def convert_to_json(py_obj):  # TODO: Document this algorithm
             json_data[key] = value
     return json_data
 
+def convert_exercise(exercise_json):
+    exercise_obj = Exercise(exercise_json)
+    return exercise_obj
+
+
+def convert_workout(workout_json):
+    exercise_list = workout_json.get("exercise_list")
+    exercise_obj_list = []
+    # If exercise list exists then convert each exercise to object
+    if exercise_list:
+        for exercise in exercise_list:
+            exercise_obj_list.append(convert_exercise(exercise))
+        # Remove old list from dictionary
+        del workout_json["exercise_list"]
+
+    # Save details
+    workout_obj = Workout(workout_json)
+    # Save new workout list
+    workout_obj.exercise_list = exercise_obj_list
+
+    return workout_obj
+
+
+def convert_workout_plan(workout_plan_json):
+    workout_list = workout_plan_json.get("exercise_list")
+    workout_obj_list = []
+    # If exercise list exists then convert each exercise to object
+    if workout_list:
+        for workout in workout_list:
+            workout_obj_list.append(convert_workout(workout))
+        # Remove old list from dictionary
+        del workout_plan_json["exercise_list"]
+
+    # Save details
+    workout_plan_obj = WorkoutPlan(workout_plan_json)
+    # Save new workout list
+    workout_plan_obj.workout_list = workout_obj_list
+
+    return workout_plan_obj
+
 
 def check_plan_name(name):
     alphabet = list(string.ascii_letters)
@@ -253,6 +293,14 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
 
     return workout_plan
 
+
+def get_workout_plans():
+    token = {
+        "token": get_access_token()["token"]
+    }
+    response = requests.get(url=Url.get_workout_plan, params=token)
+
+    return response
 
 if __name__ == "__main__":
     print(create_workout_plan(1,

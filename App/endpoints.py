@@ -19,6 +19,7 @@ class Url:
 
     get_exercises = base+"/exercises"
     add_workout_plan = base+"/workout/plan/add"
+    get_workout_plan = base+"/workout-plan"
     
 
 

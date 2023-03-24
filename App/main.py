@@ -31,6 +31,8 @@ from kivy.resources import resource_add_path, resource_find
 import user
 import json
 import workout
+from kivymd.uix.card.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox
+from kivymd.uix.label import MDLabel
 
 
 class DialogBtn(MDFlatButton):
@@ -45,6 +47,11 @@ class CustomDialog(MDDialog):
         ]
         super().__init__(**kwargs)
         self.open()
+
+
+class SwipeCardDelete(MDCardSwipe):
+    text = StringProperty()
+    image_source = StringProperty()
 
 
 class Background(FloatLayout):
@@ -243,7 +250,12 @@ class VerifyUserScreen(Screen):
 
 
 class MainScreen(Screen):
-    pass
+    def on_pre_enter(self, *args):
+        # Loads widgets in main menu screens
+        # Account Page
+        AccountPage.refresh(self.children[0].children[1].screens[2].children[0])
+        # Workouts Page
+        WorkoutPage.refresh(self.children[0].children[1].screens[1].children[0])
 
 
 class AccountPage(MDScrollView):
@@ -291,19 +303,6 @@ class AccountPage(MDScrollView):
                 CustomDialog(text=response.content.decode("utf-8")["detail"])
         except:
             CustomDialog(text="Connection error")
-
-    # Set values for current details (runs when user already logged in)
-    try:
-        user_details = user.get_user_details()
-        nameText = user_details["full_name"]
-        emailText = user_details["email_address"]
-        unText = user_details["user_name"]
-        weightUnitDropDown.text = user_details["unit_weight"]
-
-    except:
-        nameText = ""
-        emailText = ""
-        unText = ""
 
     def refresh(self):  # Ran when screen is refreshed
         try:
@@ -414,10 +413,41 @@ class ChangePasswordScreen(Screen):  # TODO add password check
             CustomDialog(text="Connection failed")
 
 
+
+
+
 class WorkoutPage(MDScrollView):
     def new_workout(self):
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "create_workout"
+
+    def remove_all_cards(self):
+        self.ids.workoutsList.clear_widgets()
+
+    def refresh(self):
+        self.remove_all_cards()
+        # Get Workout Plans
+        response = workout.get_workout_plans()
+
+        # Convert response str to list
+        response_list = json.loads(response.content.decode("utf-8"))
+
+        # Convert list to objects
+        workout_plans_list = []
+        for item in response_list:
+            workout_plans_list.append(workout.convert_workout_plan(item))
+
+        # Display each workout plan
+        for workout_plan_obj in workout_plans_list:
+            card = SwipeCardDelete(
+                text=workout_plan_obj.workout_plan_name,
+                image_source="Images/dumbbell_icon.png"
+            )
+            self.ids.workoutsList.add_widget(card)
+        pass
+
+    def remove_card(self, instance):
+        self.ids.workoutsList.remove_widget(instance)
 
 
 class CreateWorkoutScreen(Screen):
@@ -529,7 +559,7 @@ class CreateWorkoutScreen(Screen):
 class FitnessApp(MDApp):
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
-    x = 700
+    x = 550
     Window.size = (x, x / 9 * 16)
     MDApp.title = "Fitness App"
     # Set font sizes
@@ -563,7 +593,7 @@ class FitnessApp(MDApp):
 
         # Check if sign in required
         if user.check_access_token():
-            sm.current = "create_workout"
+            sm.current = "main"
         else:
             print(False)
         # sm.current = "main"  # DEBUG
