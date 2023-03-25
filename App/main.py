@@ -49,9 +49,22 @@ class CustomDialog(MDDialog):
         self.open()
 
 
-class SwipeCardDelete(MDCardSwipe):
+class WorkoutPlanCard(MDCardSwipe):
     text = StringProperty()
     image_source = StringProperty()
+    workout_plan = ObjectProperty()
+
+
+class WorkoutCard(MDCardSwipe):
+    text = StringProperty()
+    number = StringProperty()
+    workout = ObjectProperty()
+
+
+class ExerciseCard(MDCardSwipe):
+    text = StringProperty()
+    image_source = StringProperty()
+    exercise = ObjectProperty()
 
 
 class Background(FloatLayout):
@@ -253,9 +266,15 @@ class MainScreen(Screen):
     def on_pre_enter(self, *args):
         # Loads widgets in main menu screens
         # Account Page
-        AccountPage.refresh(self.children[0].children[1].screens[2].children[0])
+        name_text = self.children[0].children[1].screens[2].children[0].nameInput.text
+        if name_text == "":  # Only refresh if text field is empty
+            AccountPage.refresh(self.children[0].children[1].screens[2].children[0])
+
         # Workouts Page
-        WorkoutPage.refresh(self.children[0].children[1].screens[1].children[0])
+        # Get number of cards shown on screen
+        cards_on_screen = self.children[0].children[1].screens[1].children[0].children[0].children[0].children
+        if len(cards_on_screen) == 0:  # Only refresh if no cards on screen
+            WorkoutPage.refresh(self.children[0].children[1].screens[1].children[0])
 
 
 class AccountPage(MDScrollView):
@@ -413,9 +432,6 @@ class ChangePasswordScreen(Screen):  # TODO add password check
             CustomDialog(text="Connection failed")
 
 
-
-
-
 class WorkoutPage(MDScrollView):
     def new_workout(self):
         MDApp.get_running_app().root.transition.direction = "left"
@@ -425,9 +441,17 @@ class WorkoutPage(MDScrollView):
         self.ids.workoutsList.clear_widgets()
 
     def refresh(self):
-        self.remove_all_cards()
-        # Get Workout Plans
-        response = workout.get_workout_plans()
+        # Get Workout
+        try:
+            response = workout.get_workout_plans()
+        except:
+            CustomDialog(text="Connection failed")
+            return
+
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
 
         # Convert response str to list
         response_list = json.loads(response.content.decode("utf-8"))
@@ -438,16 +462,46 @@ class WorkoutPage(MDScrollView):
             workout_plans_list.append(workout.convert_workout_plan(item))
 
         # Display each workout plan
+        self.remove_all_cards()  # Remove old cards
         for workout_plan_obj in workout_plans_list:
-            card = SwipeCardDelete(
+            card = WorkoutPlanCard(
                 text=workout_plan_obj.workout_plan_name,
-                image_source="Images/dumbbell_icon.png"
+                image_source="Images/dumbbell_icon.png",
+                workout_plan=workout_plan_obj
             )
             self.ids.workoutsList.add_widget(card)
-        pass
 
     def remove_card(self, instance):
         self.ids.workoutsList.remove_widget(instance)
+        CustomDialog(text=f"Deleted Workout Plan: {instance.workout_plan.workout_plan_name}")
+
+    def select_card(self, instance):
+        # Make sure that user intended to click not swipe
+        if instance.state == "opened":
+            return
+        # Get plan details from server
+        try:
+            response = workout.get_workouts_in_plan(instance.workout_plan.workout_plan_id)
+        except:
+            CustomDialog(text="Connection failed")
+            return
+        # If error display error message
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
+        # Convert response str to list
+        response_list = json.loads(response.content.decode("utf-8"))
+        converted_list = []
+        for item in response_list:
+            converted_list.append(workout.convert_workout(item))
+        # Save list in workout plan
+        instance.workout_plan.workout_list = converted_list
+        # If no error, then open workout plan
+        # https://stackoverflow.com/questions/30253745/python-for-kivypass-values-between-multiple-screens
+        MDApp.get_running_app().root.get_screen("view_workouts").workout_plan = instance.workout_plan
+        MDApp.get_running_app().root.transition.direction = "left"
+        MDApp.get_running_app().root.current = "view_workouts"
 
 
 class CreateWorkoutScreen(Screen):
@@ -540,9 +594,6 @@ class CreateWorkoutScreen(Screen):
             return
 
         # Create workout plan
-        print(self.ids.planNameInput.text)
-        print(self.goalDropDown.text)
-        print(self.typeDropDown.text)
         new_workout_plan = workout.create_workout_plan(
             plan_goal=self.goalDropDown.text.lower(),
             muscles_chosen=muscles_chosen,
@@ -556,11 +607,150 @@ class CreateWorkoutScreen(Screen):
             CustomDialog(text="Connection failed")
 
 
+class ViewWorkoutsScreen(Screen):
+    workout_plan = workout.WorkoutPlan()
+
+    def on_pre_enter(self, *args):  # Load screen details on screen load
+        self.ids.planName.text = str(self.workout_plan.workout_plan_name)
+        self.load_cards()
+
+    def remove_all_cards(self):
+        self.ids.workoutsInPlanList.clear_widgets()
+
+    def remove_card(self, instance):
+        self.ids.workoutsInPlanList.remove_widget(instance)
+        CustomDialog(text=f"Deleted Workout: {instance.workout.workout_name}")
+
+    def refresh(self):
+        # Get Workouts
+        # Get plan details from server
+        try:
+            response = workout.get_workouts_in_plan(self.workout_plan.workout_plan_id)
+        except:
+            CustomDialog(text="Connection failed")
+        # If error display error message
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
+        # Convert response str to list
+        response_list = json.loads(response.content.decode("utf-8"))
+
+        # Convert list to objects
+        workouts_list = []
+        for item in response_list:
+            workouts_list.append(workout.convert_workout(item))
+
+        # Display each workout plan
+        self.load_cards()
+
+    def load_cards(self):
+        # Remove previous cards
+        self.remove_all_cards()
+        # Display each workout plan
+        workouts_list = self.workout_plan.workout_list
+        for workout_obj in workouts_list:
+            card = WorkoutCard(
+                text=workout_obj.workout_name,
+                number=str(workout_obj.workout_number),
+                workout=workout_obj
+            )
+            self.ids.workoutsInPlanList.add_widget(card)
+
+    def select_card(self, instance):
+        # Make sure that user intended to click not swipe
+        if instance.state == "opened":
+            return
+        # Get workout details from server
+        try:
+            response = workout.get_exercises_in_workout(instance.workout.workout_id)
+        except:
+            CustomDialog(text="Connection failed")
+            return
+        # If error display error message
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
+        # Convert response str to list
+        response_list = json.loads(response.content.decode("utf-8"))
+        converted_list = []
+        for item in response_list:
+            converted_list.append(workout.convert_exercise(item))
+        # Save list in workout
+        instance.workout.exercise_list = converted_list
+        # If no error, then open workout
+        # https://stackoverflow.com/questions/30253745/python-for-kivypass-values-between-multiple-screens
+        MDApp.get_running_app().root.get_screen("view_exercises").workout = instance.workout
+        MDApp.get_running_app().root.transition.direction = "left"
+        MDApp.get_running_app().root.current = "view_exercises"
+
+
+class ViewExercisesScreen(Screen):
+    workout = workout.Workout()
+
+    def on_pre_enter(self, *args):  # Load screen details on screen load
+        self.ids.workoutName.text = str(self.workout.workout_name)
+        self.load_cards()
+
+    def remove_all_cards(self):
+        self.ids.exercisesInWorkoutList.clear_widgets()
+
+    def remove_card(self, instance):
+        self.ids.exercisesInWorkoutList.remove_widget(instance)
+        CustomDialog(text=f"Deleted Exercise: {instance.exercise.exercise_name}")
+
+    def refresh(self):
+        # Get Workout Exercises
+        # Get workout details from server
+        try:
+            response = workout.get_exercises_in_workout(self.workout.workout_id)
+        except:
+            CustomDialog(text="Connection failed")
+        # If error display error message
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
+        # Convert response str to list
+        response_list = json.loads(response.content.decode("utf-8"))
+
+        # Convert list to objects
+        exercises_list = []
+        for item in response_list:
+            exercises_list.append(workout.convert_exercise(item))
+
+        # Display each workout plan
+        self.load_cards()
+
+    def load_cards(self):
+        # Remove previous cards
+        self.remove_all_cards()
+        # Display each workout plan
+        exercises_list = self.workout.exercise_list
+
+        for exercise_obj in exercises_list:
+            card = ExerciseCard(
+                text=exercise_obj.exercise_name,
+                image_source="Images/dumbbell_icon.png",
+                exercise=exercise_obj
+            )
+            self.ids.exercisesInWorkoutList.add_widget(card)
+
+    def select_card(self, instance):
+        pass
+
+
 class FitnessApp(MDApp):
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
-    x = 550
+    x = 783
+    # Following window options for debugging
+    # It does not change anything when running on mobile
     Window.size = (x, x / 9 * 16)
+    Window.top = 0
+    Window.left = 0
+    Window.borderless = True
     MDApp.title = "Fitness App"
     # Set font sizes
     font_size_coefficient = Window.size[0] / 500
@@ -589,6 +779,8 @@ class FitnessApp(MDApp):
         sm.add_widget(MainScreen(name="main"))
         sm.add_widget(ChangePasswordScreen(name="password"))
         sm.add_widget(CreateWorkoutScreen(name="create_workout"))
+        sm.add_widget(ViewWorkoutsScreen(name="view_workouts"))
+        sm.add_widget(ViewExercisesScreen(name="view_exercises"))
         # sm.current = "main"
 
         # Check if sign in required

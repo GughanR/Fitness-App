@@ -302,6 +302,26 @@ def get_workout_plans():
 
     return response
 
+
+def get_workouts_in_plan(plan_id):
+    params = {
+        "token": get_access_token()["token"],
+        "workout_plan_id": plan_id
+    }
+    response = requests.get(url=Url.get_workouts, params=params)
+
+    return response
+
+
+def get_exercises_in_workout(workout_id):
+    params = {
+        "token": get_access_token()["token"],
+        "workout_id": workout_id
+    }
+    response = requests.get(url=Url.get_workout_exercises, params=params)
+
+    return response
+
 if __name__ == "__main__":
     print(create_workout_plan(1,
                         ["chest", "triceps", "shoulders", "back", "forearms", "quadriceps", "hamstrings", "calves"],

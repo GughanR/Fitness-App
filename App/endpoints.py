@@ -20,7 +20,9 @@ class Url:
     get_exercises = base+"/exercises"
     add_workout_plan = base+"/workout/plan/add"
     get_workout_plan = base+"/workout-plan"
-    
+    get_workouts = base+"/workout"
+    get_workout_exercises = base+"/workout-exercise"
+
 
 
 if __name__ == "__main__":

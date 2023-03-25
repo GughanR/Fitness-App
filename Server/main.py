@@ -376,7 +376,7 @@ def get_workout_plans(token: str, db: Session = Depends(get_db)):
 
 
 @app.get("/workout", status_code=status.HTTP_200_OK)
-def get_workout_plans(token: str, workout_plan_id: int, db: Session = Depends(get_db)):
+def get_workouts(token: str, workout_plan_id: int, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
 
