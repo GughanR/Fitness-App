@@ -8,7 +8,7 @@ from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty, StringProperty, NumericProperty
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty, OptionProperty
 from kivy.lang import Builder
 from kivy.uix.widget import Widget, WidgetBase
 import time
@@ -473,7 +473,7 @@ class WorkoutPage(MDScrollView):
 
     def remove_card(self, instance):
         self.ids.workoutsList.remove_widget(instance)
-        CustomDialog(text=f"Deleted Workout Plan: {instance.workout_plan.workout_plan_name}")
+        CustomDialog(text=f"Deleted Workout Plan: \n{instance.workout_plan.workout_plan_name}")
 
     def select_card(self, instance):
         # Make sure that user intended to click not swipe
@@ -605,6 +605,10 @@ class CreateWorkoutScreen(Screen):
         response = new_workout_plan.save_new_plan()
         if response.status_code != 200:
             CustomDialog(text="Connection failed")
+        else:
+            CustomDialog(text="New Workout Created")
+            MDApp.get_running_app().root.transition.direction = "right"
+            MDApp.get_running_app().root.current = "main"
 
 
 class ViewWorkoutsScreen(Screen):
@@ -619,7 +623,7 @@ class ViewWorkoutsScreen(Screen):
 
     def remove_card(self, instance):
         self.ids.workoutsInPlanList.remove_widget(instance)
-        CustomDialog(text=f"Deleted Workout: {instance.workout.workout_name}")
+        CustomDialog(text=f"Deleted Workout: \n{instance.workout.workout_name}")
 
     def refresh(self):
         # Get Workouts
@@ -693,12 +697,15 @@ class ViewExercisesScreen(Screen):
         self.ids.workoutName.text = str(self.workout.workout_name)
         self.load_cards()
 
+        # Set size of floating button
+        self.ids.floatingBtn.type = "large"
+
     def remove_all_cards(self):
         self.ids.exercisesInWorkoutList.clear_widgets()
 
     def remove_card(self, instance):
         self.ids.exercisesInWorkoutList.remove_widget(instance)
-        CustomDialog(text=f"Deleted Exercise: {instance.exercise.exercise_name}")
+        CustomDialog(text=f"Deleted Exercise: \n{instance.exercise.exercise_name.title()}")
 
     def refresh(self):
         # Get Workout Exercises
@@ -731,8 +738,8 @@ class ViewExercisesScreen(Screen):
 
         for exercise_obj in exercises_list:
             card = ExerciseCard(
-                text=exercise_obj.exercise_name,
-                image_source="Images/dumbbell_icon.png",
+                text=exercise_obj.exercise_name.title(),
+                image_source=f"Images/exercises/{exercise_obj.exercise_name.lower()}.png",
                 exercise=exercise_obj
             )
             self.ids.exercisesInWorkoutList.add_widget(card)
@@ -768,6 +775,7 @@ class FitnessApp(MDApp):
         # Add screens to screen manager
         self.theme_cls.primary_palette = "DeepPurple"
         self.theme_cls.accent_palette = "DeepPurple"
+        self.theme_cls.material_style = "M3"
         # self.theme_cls.bg_dark = get_color_from_hex("#8c78ff")
         self.theme_cls.theme_style = "Light"
         sm = ScreenManager(transition=SlideTransition())

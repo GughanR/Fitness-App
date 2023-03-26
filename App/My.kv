@@ -379,9 +379,10 @@
 <MainScreen>:
 
     MDBottomNavigation:
-        panel_color: "#ffffff"
+        panel_color: "#eeeeee"
         text_color_active: "#5542ff"
-        selected_color_background: "#5542ff"
+        selected_color_background: "#dddddd"
+        use_text: False
 
         MDBottomNavigationItem:
             name: "ViewProgress"
@@ -573,7 +574,7 @@
     MDCardSwipeLayerBox:
         padding: "16dp"
         md_bg_color: "#ff4d36"
-        radius: "6dp"
+        radius: "14dp"
         MDIconButton:
             icon: "trash-can-outline"
             pos_hint: {"center_y": .5}
@@ -605,7 +606,7 @@
     MDCardSwipeLayerBox:
         padding: "16dp"
         md_bg_color: "#ff4d36"
-        radius: "6dp"
+        radius: "14dp"
         MDIconButton:
             icon: "trash-can-outline"
             pos_hint: {"center_y": .5}
@@ -639,14 +640,14 @@
     MDCardSwipeLayerBox:
         padding: "16dp"
         md_bg_color: "#ff4d36"
-        radius: "6dp"
+        radius: "14dp"
         MDIconButton:
             icon: "trash-can-outline"
             pos_hint: {"center_y": .5}
             icon_size: "50dp"
             theme_icon_color: "Custom"
             icon_color:1,1,1,1
-            on_release: root.parent.parent.parent.parent.remove_card(root)
+            on_release: root.parent.parent.parent.parent.parent.remove_card(root)
 
     MDCardSwipeFrontBox:
         line_color: 0,0,0,1
@@ -663,7 +664,7 @@
                 font_size: app.fs_normal
                 halign:"center"
                 _no_ripple_effect: True
-                on_release: root.parent.parent.parent.parent.select_card(root)
+                on_release: root.parent.parent.parent.parent.parent.select_card(root)
 
 
 
@@ -873,55 +874,63 @@
                 spacing: 20
 
 <ViewExercisesScreen>:
-    MDScrollView:
-        MDGridLayout:
-            adaptive_height: True
-            cols: 1
-            padding: 40, 20
-            spacing: 40
-            MDBoxLayout:  # Top options buttons
+    MDFloatLayout:
+        MDScrollView:
+            MDGridLayout:
                 adaptive_height: True
-                MDBoxLayout:
-                    size_hint: [0.5,1]
-                    MDIconButton:
-                        icon: "arrow-left"
-                        icon_size: app.fs_normal
-                        on_release:
-                            root.manager.transition.direction = "right"
-                            root.manager.current = "view_workouts"
-                MDBoxLayout:
-                    size_hint: [0.5,1]
-                    MDAnchorLayout:
-                        size_hint: [0.7, 1]
-                        anchor_x: "right"
-                        anchor_y: "bottom"
+                cols: 1
+                padding: 40, 20
+                spacing: 40
+                MDBoxLayout:  # Top options buttons
+                    adaptive_height: True
+                    MDBoxLayout:
+                        size_hint: [0.5,1]
                         MDIconButton:
-                            icon: "pencil"
+                            icon: "arrow-left"
                             icon_size: app.fs_normal
-                    MDAnchorLayout:
-                        size_hint: [0.3,1]
-                        anchor_x: "right"
-                        anchor_y: "bottom"
-                        MDIconButton:
-                            icon: "refresh"
-                            icon_size: app.fs_normal
-                            on_release: root.refresh()
-            MDLabel:
-                id: workoutName
-                size_hint: tInpSize
-                pos_hint: {"x":tInpX, "y": 0.8}
-                font_size:  app.fs_heading
-                halign: "center"
-            MDLabel
-            MDSeparator
-            MDFillRoundFlatButton:
-                text: "+ Exercise"
-                font_size: app.fs_normal
-                md_bg_color: app.accent_colour
-                size_hint: btnSize
-            MDList:
-                id: exercisesInWorkoutList
-                spacing: 20
+                            on_release:
+                                root.manager.transition.direction = "right"
+                                root.manager.current = "view_workouts"
+                    MDBoxLayout:
+                        size_hint: [0.5,1]
+                        MDAnchorLayout:
+                            size_hint: [0.7, 1]
+                            anchor_x: "right"
+                            anchor_y: "bottom"
+                            MDIconButton:
+                                icon: "pencil"
+                                icon_size: app.fs_normal
+                        MDAnchorLayout:
+                            size_hint: [0.3,1]
+                            anchor_x: "right"
+                            anchor_y: "bottom"
+                            MDIconButton:
+                                icon: "refresh"
+                                icon_size: app.fs_normal
+                                on_release: root.refresh()
+                MDLabel:
+                    id: workoutName
+                    size_hint: tInpSize
+                    pos_hint: {"x":tInpX, "y": 0.8}
+                    font_size:  app.fs_heading
+                    halign: "center"
+                MDLabel
+                MDSeparator
+                MDFillRoundFlatButton:
+                    text: "+ Exercise"
+                    font_size: app.fs_normal
+                    md_bg_color: app.accent_colour
+                    size_hint: btnSize
+                MDList:
+                    id: exercisesInWorkoutList
+                    spacing: 20
+    MDFloatingActionButton:
+        id: floatingBtn
+        size_hint: [0.21, 0.12]
+        pos_hint: {"x":0.74, "y": 0.025}
+        md_bg_color: "#5542ff"
+        FitImage:
+            source: "Images/ARM.png"
 
 
 #        MDBoxLayout:

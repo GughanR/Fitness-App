@@ -264,7 +264,9 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
                 # Dequeue
                 exercise_queue = muscle_subgroup_queue.pop(0)
                 exercise = exercise_queue.pop(0)
-                selected_exercises.append(exercise)
+                # Only add exercise if it is not already there
+                if exercise not in selected_exercises:  # TODO: ERROR fixed
+                    selected_exercises.append(exercise)
                 # Enqueue again
                 exercise_queue.append(exercise)
                 muscle_subgroup_queue.append(exercise_queue)
