@@ -69,6 +69,7 @@ def convert_to_json(py_obj):  # TODO: Document this algorithm
             json_data[key] = value
     return json_data
 
+
 def convert_exercise(exercise_json):
     exercise_obj = Exercise(exercise_json)
     return exercise_obj
@@ -122,7 +123,7 @@ def check_plan_name(name):
     for char in name:
         if char == " ":
             continue
-        elif char not in (alphabet + digits + email_valid_char):
+        elif char not in (alphabet + digits + email_valid_char + ["(", ")"]):
             return "Invalid character(s) in plan name"
         else:
             contains_char = True
@@ -131,7 +132,6 @@ def check_plan_name(name):
         return "A plan name must be entered"
 
     return True
-
 
 
 def get_exercises():
@@ -300,7 +300,7 @@ def get_workout_plans():
     token = {
         "token": get_access_token()["token"]
     }
-    response = requests.get(url=Url.get_workout_plan, params=token)
+    response = requests.get(url=Url.workout_plan, params=token)
 
     return response
 
@@ -310,7 +310,7 @@ def get_workouts_in_plan(plan_id):
         "token": get_access_token()["token"],
         "workout_plan_id": plan_id
     }
-    response = requests.get(url=Url.get_workouts, params=params)
+    response = requests.get(url=Url.workout, params=params)
 
     return response
 
@@ -320,13 +320,35 @@ def get_exercises_in_workout(workout_id):
         "token": get_access_token()["token"],
         "workout_id": workout_id
     }
-    response = requests.get(url=Url.get_workout_exercises, params=params)
+    response = requests.get(url=Url.workout_exercise, params=params)
 
     return response
 
+
+def update_workout_plan(updated_plan):
+    params = {
+        "token": get_access_token()["token"]
+    }
+    payload = convert_to_json(updated_plan)
+    response = requests.put(url=Url.workout_plan, params=params, json=payload)
+
+    return response
+
+
+def update_workout(updated_workout):
+    params = {
+        "token": get_access_token()["token"]
+    }
+    payload = convert_to_json(updated_workout)
+    response = requests.put(url=Url.workout, params=params, json=payload)
+
+    return response
+
+
 if __name__ == "__main__":
     print(create_workout_plan(1,
-                        ["chest", "triceps", "shoulders", "back", "forearms", "quadriceps", "hamstrings", "calves"],
-                        "push pull legs",
-                        1,
-                        3))
+                              ["chest", "triceps", "shoulders", "back", "forearms", "quadriceps", "hamstrings",
+                               "calves"],
+                              "push pull legs",
+                              1,
+                              3))

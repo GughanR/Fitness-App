@@ -716,7 +716,7 @@
             pos_hint: {"x":tInpX, "y": 0.8}
             font_size:  app.fs_normal
         MDDropDownItem:
-            size_hint: [0.3, 0.1]
+            size_hint: [0.3, 0.05]
             pos_hint: {"x":1-0.3-tInpX, "y": 0.81}
             id: goalDropDown
             text: "Size"
@@ -728,7 +728,7 @@
             pos_hint: {"x":tInpX, "y": 0.73}
             font_size:  app.fs_normal
         MDDropDownItem:
-            size_hint: [0.45, 0.1]
+            size_hint: [0.45, 0.05]
             pos_hint: {"x":1-0.45-tInpX, "y": 0.74}
             id: typeDropDown
             text: "Full Body"
@@ -848,6 +848,9 @@
                         MDIconButton:
                             icon: "pencil"
                             icon_size: app.fs_normal
+                            on_release:
+                                root.manager.transition.direction = "left"
+                                root.manager.current = "edit_workout_plan"
                     MDAnchorLayout:
                         size_hint: [0.3,1]
                         anchor_x: "right"
@@ -862,6 +865,7 @@
                 pos_hint: {"x":tInpX, "y": 0.8}
                 font_size:  app.fs_heading
                 halign: "center"
+                adaptive_height: True
             MDLabel
             MDSeparator
             MDFillRoundFlatButton:
@@ -900,6 +904,9 @@
                             MDIconButton:
                                 icon: "pencil"
                                 icon_size: app.fs_normal
+                                on_release:
+                                    root.manager.transition.direction = "left"
+                                    root.manager.current = "edit_workout"
                         MDAnchorLayout:
                             size_hint: [0.3,1]
                             anchor_x: "right"
@@ -914,6 +921,7 @@
                     pos_hint: {"x":tInpX, "y": 0.8}
                     font_size:  app.fs_heading
                     halign: "center"
+                    adaptive_height: True
                 MDLabel
                 MDSeparator
                 MDFillRoundFlatButton:
@@ -932,7 +940,81 @@
         FitImage:
             source: "Images/ARM.png"
 
+<EditWorkoutPlanScreen>:
+    FloatLayout:
+        MDLabel:
+            pos_hint: {"x": 0.1, "y": 0.7 }
+            size_hint: 0.8, 0.2
+            text: "Edit Workout Plan"
+            halign: "left"
+            valign: "top"
+            font_size: app.fs_heading
+            color: 0,0,0,1
+        BackButton:
+            on_release:
+                root.manager.transition.direction = "right"
+                root.manager.current = "view_workouts"
+        MDTextField:
+            id: planNameInput
+            hint_text: "Workout Plan Name"
+            size_hint: 0.8, 0.1
+            pos_hint: {"x": 0.1, "y": 0.55}
+            mode: "rectangle"
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+            font_size: app.fs_normal
+        MDLabel:
+            text: "Plan Goal:"
+            size_hint: tInpSize
+            pos_hint: {"x":tInpX, "y": 0.45}
+            font_size:  app.fs_normal
+        MDDropDownItem:
+            size_hint: [0.3, 0.05]
+            pos_hint: {"x":1-0.3-tInpX, "y": 0.46}
+            id: goalDropDown
+            text: "Size"
+            font_size: app.fs_normal
+            on_release: root.show_goal_drop_down()
+        MDFillRoundFlatButton:
+            id: updateBtn
+            size_hint: btnSize
+            pos_hint: {"x": btnX, "y": 0.2}
+            text: "Update"
+            font_size: 50
+            md_bg_color: "#5542ff"
+            on_release: root.update_workout_plan()
 
+<EditWorkoutScreen>:
+    FloatLayout:
+        MDLabel:
+            pos_hint: {"x": 0.1, "y": 0.7 }
+            size_hint: 0.8, 0.2
+            text: "Edit Workout"
+            halign: "left"
+            valign: "top"
+            font_size: app.fs_heading
+            color: 0,0,0,1
+        BackButton:
+            on_release:
+                root.manager.transition.direction = "right"
+                root.manager.current = "view_workouts"
+        MDTextField:
+            id: workoutNameInput
+            hint_text: "Workout Name"
+            size_hint: 0.8, 0.1
+            pos_hint: {"x": 0.1, "y": 0.55}
+            mode: "rectangle"
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+            font_size: app.fs_normal
+        MDFillRoundFlatButton:
+            id: updateBtn
+            size_hint: btnSize
+            pos_hint: {"x": btnX, "y": 0.2}
+            text: "Update"
+            font_size: 50
+            md_bg_color: "#5542ff"
+            on_release: root.update_workout()
 #        MDBoxLayout:
 #            padding: 0, -20
 #            cols: 2

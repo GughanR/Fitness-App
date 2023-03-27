@@ -509,6 +509,19 @@ class CreateWorkoutScreen(Screen):
     typeDropDown = ObjectProperty(None)
     numOfDaysInput = ObjectProperty(None)
 
+    def on_pre_enter(self, *args):
+        # Clear inputs previously entered
+        for widget_name, widget_object in self.ids.items():
+            # Text Inputs
+            if "Input" in widget_name:
+                widget_object.text = ""
+            # Exercise Chips
+            elif "chip" in widget_name:
+                widget_object.active = True
+        # Drop Downs
+        self.ids.goalDropDown.text = "Size"
+        self.ids.typeDropDown.text = "Full Body"
+
     def show_goal_drop_down(self):
         self.list_items = [
             {
@@ -697,9 +710,6 @@ class ViewExercisesScreen(Screen):
         self.ids.workoutName.text = str(self.workout.workout_name)
         self.load_cards()
 
-        # Set size of floating button
-        self.ids.floatingBtn.type = "large"
-
     def remove_all_cards(self):
         self.ids.exercisesInWorkoutList.clear_widgets()
 
@@ -748,6 +758,99 @@ class ViewExercisesScreen(Screen):
         pass
 
 
+class EditWorkoutPlanScreen(Screen):
+    workout_plan = workout.WorkoutPlan()
+
+    def on_pre_enter(self, *args):
+        # Show current details
+        # Get details from ViewWorkoutsScreen
+        self.workout_plan = MDApp.get_running_app().root.get_screen("view_workouts").workout_plan
+
+        # Set plan name
+        self.ids.planNameInput.text = str(self.workout_plan.workout_plan_name)
+        # Set plan goal
+        self.ids.goalDropDown.text = str(self.workout_plan.workout_plan_goal).title()
+
+    def show_goal_drop_down(self):
+        self.list_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Size",
+                "halign": "center",
+                "on_release": lambda x="Size": self.update_goal("Size")
+            },
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Strength",
+                "on_release": lambda x="Strength": self.update_goal("Strength")
+            }
+        ]
+        self.drop_down = MDDropdownMenu(
+            caller=self.ids.goalDropDown,
+            items=self.list_items,
+            width_mult=2
+        )
+        self.drop_down.open()
+
+    def update_goal(self, text):
+        self.ids.goalDropDown.text = text
+        self.drop_down.dismiss()
+
+    def update_workout_plan(self):
+        # Check plan name
+        valid = workout.check_plan_name(self.ids.planNameInput.text)
+        if type(valid) == str:
+            CustomDialog(text=valid)
+            return
+        # Get new variables
+        self.workout_plan.workout_plan_name = self.ids.planNameInput.text
+        self.workout_plan.workout_plan_goal = self.ids.goalDropDown.text.lower()
+        # Send request
+        try:
+            response = workout.update_workout_plan(self.workout_plan)
+        except:
+            CustomDialog(text="Connection error")
+            return
+        # Output error message
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+        else:
+            # Output success message
+            CustomDialog(text="Updated Workout Plan")
+
+
+class EditWorkoutScreen(Screen):
+    workout = workout.Workout()
+
+    def on_pre_enter(self, *args):
+        # Show current details
+        # Get details from ViewWorkoutsScreen
+        self.workout = MDApp.get_running_app().root.get_screen("view_exercises").workout
+        # Set workout name
+        self.ids.workoutNameInput.text = str(self.workout.workout_name)
+
+    def update_workout(self):
+        # Check workout name
+        valid = workout.check_plan_name(self.ids.workoutNameInput.text)
+        if type(valid) == str:
+            CustomDialog(text=valid)
+            return
+        # Get new variable
+        self.workout.workout_name = self.ids.workoutNameInput.text
+        # Send request
+        try:
+            response = workout.update_workout(self.workout)
+        except:
+            CustomDialog(text="Connection error")
+            return
+        # Output error message
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+        else:
+            # Output success message
+            CustomDialog(text="Updated Workout")
+
+
 class FitnessApp(MDApp):
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
@@ -789,6 +892,8 @@ class FitnessApp(MDApp):
         sm.add_widget(CreateWorkoutScreen(name="create_workout"))
         sm.add_widget(ViewWorkoutsScreen(name="view_workouts"))
         sm.add_widget(ViewExercisesScreen(name="view_exercises"))
+        sm.add_widget(EditWorkoutPlanScreen(name="edit_workout_plan"))
+        sm.add_widget(EditWorkoutScreen(name="edit_workout"))
         # sm.current = "main"
 
         # Check if sign in required

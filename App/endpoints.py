@@ -1,5 +1,6 @@
 import json
 
+
 def get_base_url():
     with open("server.json") as json_file:
         data = json.load(json_file)
@@ -19,10 +20,9 @@ class Url:
 
     get_exercises = base+"/exercises"
     add_workout_plan = base+"/workout/plan/add"
-    get_workout_plan = base+"/workout-plan"
-    get_workouts = base+"/workout"
-    get_workout_exercises = base+"/workout-exercise"
-
+    workout_plan = base + "/workout-plan"
+    workout = base + "/workout"
+    workout_exercise = base + "/workout-exercise"
 
 
 if __name__ == "__main__":

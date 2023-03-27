@@ -432,3 +432,79 @@ def get_workout_exercises(token: str, workout_id: int, db: Session = Depends(get
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return workout_exercises
+
+
+@app.put("/workout-plan", status_code=status.HTTP_200_OK)
+def update_workout_plan(token: str, updated_plan: schemas.WorkoutPlan, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    # Check that workout plan and access token match to same user
+    statement = (
+        select(models.User)
+        .join(models.AccessToken)
+        .join(models.WorkoutPlan)
+        .where(
+            models.WorkoutPlan.workout_plan_id == updated_plan.workout_plan_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        # Only one value can be returned
+        user = db.scalars(statement).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden activity.")
+
+    statement = (
+        update(models.WorkoutPlan)
+        .where(models.WorkoutPlan.workout_plan_id == updated_plan.workout_plan_id)
+        .values(
+            workout_plan_name=updated_plan.workout_plan_name,
+            workout_plan_goal=updated_plan.workout_plan_goal
+        )
+    )
+    try:
+        db.execute(statement)
+        db.commit()
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success"}
+
+
+@app.put("/workout", status_code=status.HTTP_200_OK)
+def update_workout(token: str, updated_workout: schemas.Workout, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    # Check that workout and access token match to same user
+    statement = (
+        select(models.User)
+        .join(models.AccessToken)
+        .join(models.WorkoutPlan)
+        .join(models.Workout)
+        .where(
+            models.Workout.workout_id == updated_workout.workout_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        # Only one value can be returned
+        user = db.scalars(statement).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden activity.")
+
+    statement = (
+        update(models.Workout)
+        .where(models.Workout.workout_id == updated_workout.workout_id)
+        .values(
+            workout_name=updated_workout.workout_name
+        )
+    )
+    try:
+        db.execute(statement)
+        db.commit()
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success"}
