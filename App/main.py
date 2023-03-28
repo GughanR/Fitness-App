@@ -23,7 +23,7 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.bottomnavigation.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.refreshlayout import MDScrollViewRefreshLayout
-from kivy.utils import get_color_from_hex
+from kivy.utils import get_color_from_hex, platform
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import OneLineListItem
 import os, sys
@@ -879,7 +879,6 @@ class FitnessApp(MDApp):
         self.theme_cls.primary_palette = "DeepPurple"
         self.theme_cls.accent_palette = "DeepPurple"
         self.theme_cls.material_style = "M3"
-        # self.theme_cls.bg_dark = get_color_from_hex("#8c78ff")
         self.theme_cls.theme_style = "Light"
         sm = ScreenManager(transition=SlideTransition())
         sm.add_widget(InitialScreen(name="initial"))
@@ -907,6 +906,4 @@ class FitnessApp(MDApp):
 
 
 if __name__ == '__main__':
-    if hasattr(sys, '_MEIPASS'):
-        resource_add_path(os.path.join(sys._MEIPASS))
     FitnessApp().run()

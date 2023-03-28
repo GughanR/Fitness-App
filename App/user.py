@@ -1,16 +1,18 @@
-# This module is reponsible for allowing access to users
+# This module is responsible for allowing access to users
+import os
 import string
 import requests
 import json
 from endpoints import Url
 from datetime import datetime
+from set_cache_directory import CACHE_DIR
 
 
 def check_name(name):
     alphabet = list(string.ascii_letters)
     for char in name:
         if char not in alphabet:
-            if ((char != " ") and (char != "'")):
+            if (char != " ") and (char != "'"):
                 return "Name must only contain alphabetical characters"
     return True
 
@@ -100,7 +102,7 @@ def is_email(user_input):  # TODO Delete
 
 
 def get_access_token():
-    with open("access_token.json") as json_file:
+    with open(os.path.join(CACHE_DIR, "access_token.json")) as json_file:
         try:
             data = json.load(json_file)
         except:
@@ -118,12 +120,11 @@ def login(username, password):
     response = requests.get(url=login_url, params=payload)
     response_str = response.content.decode("utf-8")  # decode bytestring and convert to json
     access_token = json.dumps(json.loads(response_str), indent=4)
-
-    with open("access_token.json", "w+") as json_file:
-        json_file.write(access_token)
+    if response.status_code == 200:
+        with open(os.path.join(CACHE_DIR, "access_token.json"), "w+") as json_file:
+            json_file.write(access_token)
 
     return response
-
 
 def create_account(full_name, email_address, user_name, password):
     payload = {
@@ -247,7 +248,7 @@ def logout():
 
     if response.status_code == 200 or 403:
         # Delete contents of access_token
-        with open("access_token.json", "w+") as json_file:
+        with open(os.path.join(CACHE_DIR, "access_token.json"), "w+") as json_file:
             pass
 
     return response
