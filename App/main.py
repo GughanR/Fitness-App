@@ -472,8 +472,20 @@ class WorkoutPage(MDScrollView):
             self.ids.workoutsList.add_widget(card)
 
     def remove_card(self, instance):
-        self.ids.workoutsList.remove_widget(instance)
-        CustomDialog(text=f"Deleted Workout Plan: \n{instance.workout_plan.workout_plan_name}")
+        # Delete workout plan
+        try:
+            response = workout.delete_workout_plan(instance.workout_plan)
+        except:
+            CustomDialog(text="Connection failed")
+            return
+
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
+        else:
+            self.ids.workoutsList.remove_widget(instance)
+            CustomDialog(text=f"Deleted Workout Plan: \n{instance.workout_plan.workout_plan_name}")
 
     def select_card(self, instance):
         # Make sure that user intended to click not swipe
@@ -635,8 +647,20 @@ class ViewWorkoutsScreen(Screen):
         self.ids.workoutsInPlanList.clear_widgets()
 
     def remove_card(self, instance):
-        self.ids.workoutsInPlanList.remove_widget(instance)
-        CustomDialog(text=f"Deleted Workout: \n{instance.workout.workout_name}")
+        # Delete workout
+        try:
+            response = workout.delete_workout(instance.workout)
+        except:
+            CustomDialog(text="Connection failed")
+            return
+
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
+        else:
+            self.ids.workoutsInPlanList.remove_widget(instance)
+            CustomDialog(text=f"Deleted Workout: \n{instance.workout.workout_name}")
 
     def refresh(self):
         # Get Workouts
@@ -714,8 +738,20 @@ class ViewExercisesScreen(Screen):
         self.ids.exercisesInWorkoutList.clear_widgets()
 
     def remove_card(self, instance):
-        self.ids.exercisesInWorkoutList.remove_widget(instance)
-        CustomDialog(text=f"Deleted Exercise: \n{instance.exercise.exercise_name.title()}")
+        # Delete exercise
+        try:
+            response = workout.delete_exercise(instance.exercise)
+        except:
+            CustomDialog(text="Connection failed")
+            return
+
+        if response.status_code != 200:
+            CustomDialog(
+                text=json.loads(response.content.decode("utf-8"))["detail"]
+            )
+        else:
+            self.ids.exercisesInWorkoutList.remove_widget(instance)
+            CustomDialog(text=f"Deleted Exercise: \n{instance.exercise.exercise_name.title()}")
 
     def refresh(self):
         # Get Workout Exercises

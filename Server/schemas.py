@@ -32,6 +32,7 @@ class UpdatedUser(StrictBaseModel):
 
 class Exercise(BaseModel):
     exercise_id: int
+    workout_exercise_id: int
     exercise_name: str
     min_reps: int
     max_reps: int

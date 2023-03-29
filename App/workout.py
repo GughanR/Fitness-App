@@ -35,7 +35,7 @@ class Exercise:
         # Given dictionary will be used to add attributes
         # If no dict given then default dict will be empty
         self.exercise_id = data.get("exercise_id")
-        self.workout_exercise_id = data.get("exercise_id")
+        self.workout_exercise_id = data.get("workout_exercise_id")
         self.exercise_name = data.get("exercise_name")
         self.min_reps = data.get("min_reps")
         self.max_reps = data.get("max_reps")
@@ -345,10 +345,35 @@ def update_workout(updated_workout):
     return response
 
 
+def delete_workout_plan(plan_to_delete):
+    params = {
+        "token": get_access_token()["token"]
+    }
+    payload = convert_to_json(plan_to_delete)
+    response = requests.delete(url=Url.workout_plan, params=params, json=payload)
+
+    return response
+
+
+def delete_exercise(exercise_to_delete):
+    params = {
+        "token": get_access_token()["token"]
+    }
+    payload = convert_to_json(exercise_to_delete)
+    response = requests.delete(url=Url.workout_exercise, params=params, json=payload)
+
+    return response
+
+
+def delete_workout(workout_to_delete):
+    params = {
+        "token": get_access_token()["token"]
+    }
+    payload = convert_to_json(workout_to_delete)
+    response = requests.delete(url=Url.workout, params=params, json=payload)
+
+    return response
+
+
 if __name__ == "__main__":
-    print(create_workout_plan(1,
-                              ["chest", "triceps", "shoulders", "back", "forearms", "quadriceps", "hamstrings",
-                               "calves"],
-                              "push pull legs",
-                              1,
-                              3))
+    pass

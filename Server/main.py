@@ -4,7 +4,7 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import select, update, and_, or_
+from sqlalchemy import select, update, and_, or_, delete
 import random
 import json
 import string
@@ -505,6 +505,181 @@ def update_workout(token: str, updated_workout: schemas.Workout, db: Session = D
         db.execute(statement)
         db.commit()
     except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success"}
+
+
+@app.delete("/workout-plan", status_code=status.HTTP_200_OK)
+def delete_workout_plan(token: str, plan_to_delete: schemas.WorkoutPlan, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    # Check that workout plan and access token match to same user
+    statement = (
+        select(models.User)
+        .join(models.AccessToken)
+        .join(models.WorkoutPlan)
+        .where(
+            models.WorkoutPlan.workout_plan_id == plan_to_delete.workout_plan_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        # Only one value can be returned
+        user = db.scalars(statement).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden activity.")
+    # Get workout exercise ids
+    statement = (
+        select(models.WorkoutExercise.workout_exercise_id)
+        .join(models.Workout)
+        .where(models.Workout.workout_plan_id == plan_to_delete.workout_plan_id)
+    )
+    try:
+        workout_exercises = db.scalars(statement).all()
+        # Remove relationship between workout_exercise and workout_exercise_history
+        statement = (
+            update(models.WorkoutExerciseHistory)
+            .where(models.WorkoutExerciseHistory.workout_exercise_id.in_(workout_exercises))
+            .values(workout_exercise_id=None)
+        )
+        db.execute(statement)
+        db.commit()
+
+        # Delete workout exercises
+        statement = (
+            delete(models.WorkoutExercise)
+            .where(models.WorkoutExercise.workout_exercise_id.in_(workout_exercises))
+        )
+        db.execute(statement)
+        db.commit()
+
+        # Delete workout
+        statement = (
+            delete(models.Workout)
+            .where(models.Workout.workout_plan_id == plan_to_delete.workout_plan_id)
+        )
+        db.execute(statement)
+        db.commit()
+
+        # Delete workout plan
+        statement = (
+            delete(models.WorkoutPlan)
+            .where(models.WorkoutPlan.workout_plan_id == plan_to_delete.workout_plan_id)
+        )
+        db.execute(statement)
+        db.commit()
+
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success"}
+
+
+@app.delete("/workout-exercise", status_code=status.HTTP_200_OK)
+def delete_exercise(token: str, exercise_to_delete: schemas.Exercise, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    # Check that exercise and access token match to same user
+    statement = (
+        select(models.User)
+        .join(models.AccessToken)
+        .join(models.WorkoutPlan)
+        .join(models.Workout)
+        .join(models.WorkoutExercise)
+        .where(
+            models.WorkoutExercise.workout_exercise_id == exercise_to_delete.workout_exercise_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        # Only one value can be returned
+        user = db.scalars(statement).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden activity.")
+
+    try:
+        # Remove relationship between workout_exercise and workout_exercise_history
+        statement = (
+            update(models.WorkoutExerciseHistory)
+            .where(models.WorkoutExerciseHistory.workout_exercise_id == exercise_to_delete.workout_exercise_id)
+            .values(workout_exercise_id=None)
+        )
+        db.execute(statement)
+        db.commit()
+
+        # Delete workout exercise
+        statement = (
+            delete(models.WorkoutExercise)
+            .where(models.WorkoutExercise.workout_exercise_id == exercise_to_delete.workout_exercise_id)
+        )
+        db.execute(statement)
+        db.commit()
+
+    except:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success"}
+
+
+@app.delete("/workout", status_code=status.HTTP_200_OK)
+def delete_workout(token: str, workout_to_delete: schemas.Workout, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    # Check that workout plan and access token match to same user
+    statement = (
+        select(models.User)
+        .join(models.AccessToken)
+        .join(models.WorkoutPlan)
+        .join(models.Workout)
+        .where(
+            models.Workout.workout_id == workout_to_delete.workout_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        # Only one value can be returned
+        user = db.scalars(statement).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden activity.")
+    # Get workout exercise ids
+    statement = (
+        select(models.WorkoutExercise.workout_exercise_id)
+        .join(models.Workout)
+        .where(models.Workout.workout_id == workout_to_delete.workout_id)
+    )
+    try:
+        workout_exercises = db.scalars(statement).all()
+        # Remove relationship between workout_exercise and workout_exercise_history
+        statement = (
+            update(models.WorkoutExerciseHistory)
+            .where(models.WorkoutExerciseHistory.workout_exercise_id.in_(workout_exercises))
+            .values(workout_exercise_id=None)
+        )
+        db.execute(statement)
+        db.commit()
+
+        # Delete workout exercises
+        statement = (
+            delete(models.WorkoutExercise)
+            .where(models.WorkoutExercise.workout_exercise_id.in_(workout_exercises))
+        )
+        db.execute(statement)
+        db.commit()
+
+        # Delete workout
+        statement = (
+            delete(models.Workout)
+            .where(models.Workout.workout_id == workout_to_delete.workout_id)
+        )
+        db.execute(statement)
+        db.commit()
+
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return {"detail": "success"}
