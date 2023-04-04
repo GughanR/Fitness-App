@@ -610,6 +610,13 @@ def delete_exercise(token: str, exercise_to_delete: schemas.Exercise, db: Sessio
         db.execute(statement)
         db.commit()
 
+        # Get workout_id of deleted workout exercise (needed to reorder exercises)
+        statement = (
+            select(models.WorkoutExercise.workout_id)
+            .where(models.WorkoutExercise.workout_exercise_id == exercise_to_delete.workout_exercise_id)
+        )
+        deleted_workout_id = db.scalars(statement).one()
+
         # Delete workout exercise
         statement = (
             delete(models.WorkoutExercise)
@@ -618,7 +625,21 @@ def delete_exercise(token: str, exercise_to_delete: schemas.Exercise, db: Sessio
         db.execute(statement)
         db.commit()
 
-    except:
+        # Reorder workout exercises
+        statement = (
+            update(models.WorkoutExercise)
+            .where(
+                models.WorkoutExercise.workout_id == deleted_workout_id,
+                models.WorkoutExercise.workout_exercise_number > exercise_to_delete.workout_exercise_number
+            )
+            .values(workout_exercise_number=models.WorkoutExercise.workout_exercise_number-1)
+        )
+
+        db.execute(statement)
+        db.commit()
+
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return {"detail": "success"}
@@ -662,6 +683,13 @@ def delete_workout(token: str, workout_to_delete: schemas.Workout, db: Session =
         db.execute(statement)
         db.commit()
 
+        # Get workout_plan_id of deleted workout (needed to reorder workouts)
+        statement = (
+            select(models.Workout.workout_plan_id)
+            .where(models.Workout.workout_id == workout_to_delete.workout_id)
+        )
+        deleted_workout_plan_id = db.scalars(statement).one()
+
         # Delete workout exercises
         statement = (
             delete(models.WorkoutExercise)
@@ -675,6 +703,19 @@ def delete_workout(token: str, workout_to_delete: schemas.Workout, db: Session =
             delete(models.Workout)
             .where(models.Workout.workout_id == workout_to_delete.workout_id)
         )
+        db.execute(statement)
+        db.commit()
+
+        # Reorder workouts
+        statement = (
+            update(models.Workout)
+            .where(
+                models.Workout.workout_plan_id == deleted_workout_plan_id,
+                models.Workout.workout_number > workout_to_delete.workout_number
+            )
+            .values(workout_number=models.Workout.workout_number - 1)
+        )
+
         db.execute(statement)
         db.commit()
 

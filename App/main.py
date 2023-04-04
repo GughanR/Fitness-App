@@ -627,7 +627,7 @@ class CreateWorkoutScreen(Screen):
             num_of_days=int(self.ids.numOfDaysInput.text)
         )
         # TODO: Show user plan before saving
-        response = new_workout_plan.save_new_plan()
+        response = workout.save_new_plan(new_workout_plan)
         if response.status_code != 200:
             CustomDialog(text="Connection failed")
         else:
@@ -661,6 +661,7 @@ class ViewWorkoutsScreen(Screen):
         else:
             self.ids.workoutsInPlanList.remove_widget(instance)
             CustomDialog(text=f"Deleted Workout: \n{instance.workout.workout_name}")
+        self.refresh()
 
     def refresh(self):
         # Get Workouts
@@ -681,6 +682,8 @@ class ViewWorkoutsScreen(Screen):
         workouts_list = []
         for item in response_list:
             workouts_list.append(workout.convert_workout(item))
+        # Save new details
+        self.workout_plan.workout_list = workouts_list
 
         # Display each workout plan
         self.load_cards()
@@ -760,6 +763,7 @@ class ViewExercisesScreen(Screen):
             response = workout.get_exercises_in_workout(self.workout.workout_id)
         except:
             CustomDialog(text="Connection failed")
+            return
         # If error display error message
         if response.status_code != 200:
             CustomDialog(
@@ -772,6 +776,8 @@ class ViewExercisesScreen(Screen):
         exercises_list = []
         for item in response_list:
             exercises_list.append(workout.convert_exercise(item))
+        # Save new details
+        self.workout.exercise_list = exercises_list
 
         # Display each workout plan
         self.load_cards()

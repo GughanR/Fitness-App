@@ -296,6 +296,20 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
     return workout_plan
 
 
+def save_new_plan(new_plan):
+    # Save new plan in database
+    print(json.dumps(convert_to_json(new_plan), indent=4))
+    payload = convert_to_json(new_plan)
+    token = {
+        "token": get_access_token()["token"]
+    }
+    url = Url.add_workout_plan
+
+    response = requests.post(url=url, json=payload, params=token)
+
+    return response
+
+
 def get_workout_plans():
     token = {
         "token": get_access_token()["token"]
