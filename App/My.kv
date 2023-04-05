@@ -880,6 +880,7 @@
                 font_size: app.fs_normal
                 md_bg_color: app.accent_colour
                 size_hint: btnSize
+                on_release: root.add_workout()
             MDList:
                 id: workoutsInPlanList
                 spacing: 20
@@ -970,6 +971,9 @@
             helper_text_mode: "persistent"
             helper_text_color_normal: 1,0,0,1
             font_size: app.fs_normal
+        MDSeparator:
+            size_hint: 0.8, 0.001
+            pos_hint: {"x": 0.1, "y": 0.73}
         MDLabel:
             text: "Plan Goal:"
             size_hint: tInpSize
@@ -1001,6 +1005,9 @@
             valign: "top"
             font_size: app.fs_heading
             color: 0,0,0,1
+        MDSeparator:
+            size_hint: 0.8, 0.001
+            pos_hint: {"x": 0.1, "y": 0.73}
         BackButton:
             on_release:
                 root.manager.transition.direction = "right"
@@ -1022,6 +1029,41 @@
             font_size: 50
             md_bg_color: "#5542ff"
             on_release: root.update_workout()
+
+<AddWorkoutScreen>:
+    FloatLayout:
+        MDLabel:
+            pos_hint: {"x": 0.1, "y": 0.7 }
+            size_hint: 0.8, 0.2
+            text: "Add Workout"
+            halign: "left"
+            valign: "top"
+            font_size: app.fs_heading
+            color: 0,0,0,1
+        MDSeparator:
+            size_hint: 0.8, 0.001
+            pos_hint: {"x": 0.1, "y": 0.73}
+        BackButton:
+            on_release:
+                root.manager.transition.direction = "right"
+                root.manager.current = "view_workouts"
+        MDTextField:
+            id: workoutNameInput
+            hint_text: "Workout Name"
+            size_hint: 0.8, 0.1
+            pos_hint: {"x": 0.1, "y": 0.55}
+            mode: "rectangle"
+            helper_text_mode: "persistent"
+            helper_text_color_normal: 1,0,0,1
+            font_size: app.fs_normal
+        MDFillRoundFlatButton:
+            id: createBtn
+            size_hint: btnSize
+            pos_hint: {"x": btnX, "y": 0.2}
+            text: "Update"
+            font_size: 50
+            md_bg_color: "#5542ff"
+            on_release: root.add_workout()
 #        MDBoxLayout:
 #            padding: 0, -20
 #            cols: 2

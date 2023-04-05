@@ -641,7 +641,7 @@ class ViewWorkoutsScreen(Screen):
 
     def on_pre_enter(self, *args):  # Load screen details on screen load
         self.ids.planName.text = str(self.workout_plan.workout_plan_name)
-        self.load_cards()
+        self.refresh()
 
     def remove_all_cards(self):
         self.ids.workoutsInPlanList.clear_widgets()
@@ -728,6 +728,11 @@ class ViewWorkoutsScreen(Screen):
         MDApp.get_running_app().root.get_screen("view_exercises").workout = instance.workout
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "view_exercises"
+
+    def add_workout(self):
+        MDApp.get_running_app().root.get_screen("add_workout").workout_plan = self.workout_plan
+        MDApp.get_running_app().root.transition.direction = "left"
+        MDApp.get_running_app().root.current = "add_workout"
 
 
 class ViewExercisesScreen(Screen):
@@ -893,6 +898,40 @@ class EditWorkoutScreen(Screen):
             CustomDialog(text="Updated Workout")
 
 
+class AddWorkoutScreen(Screen):
+    workout_plan = workout.WorkoutPlan()
+
+    def add_workout(self):
+        # Check workout name
+        valid = workout.check_plan_name(self.ids.workoutNameInput.text)
+        if type(valid) == str:
+            CustomDialog(text=valid)
+            return
+        # Create workout object
+        # Calculate workout number
+        workout_number = len(self.workout_plan.workout_list)
+        new_workout = workout.Workout(
+            {
+                "workout_number": workout_number,
+                "workout_name": self.ids.workoutNameInput.text
+            }
+        )
+        # If name valid then send request
+        try:
+            response = workout.add_workout(new_workout, self.workout_plan.workout_plan_id)
+        except:
+            CustomDialog(text="Connection error")
+            return
+        # Output error message
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+        else:
+            # Output success message
+            CustomDialog(text="Added Workout")
+        # Change screen
+        MDApp.get_running_app().root.transition.direction = "right"
+        MDApp.get_running_app().root.current = "view_workouts"
+
 class FitnessApp(MDApp):
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
@@ -935,6 +974,7 @@ class FitnessApp(MDApp):
         sm.add_widget(ViewExercisesScreen(name="view_exercises"))
         sm.add_widget(EditWorkoutPlanScreen(name="edit_workout_plan"))
         sm.add_widget(EditWorkoutScreen(name="edit_workout"))
+        sm.add_widget(AddWorkoutScreen(name="add_workout"))
         # sm.current = "main"
 
         # Check if sign in required

@@ -298,7 +298,6 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
 
 def save_new_plan(new_plan):
     # Save new plan in database
-    print(json.dumps(convert_to_json(new_plan), indent=4))
     payload = convert_to_json(new_plan)
     token = {
         "token": get_access_token()["token"]
@@ -385,6 +384,20 @@ def delete_workout(workout_to_delete):
     }
     payload = convert_to_json(workout_to_delete)
     response = requests.delete(url=Url.workout, params=params, json=payload)
+
+    return response
+
+
+def add_workout(new_workout, workout_plan_id):
+    # Save new plan in database
+    payload = convert_to_json(new_workout)
+    params = {
+        "token": get_access_token()["token"],
+        "workout_plan_id": workout_plan_id
+    }
+    url = Url.workout
+
+    response = requests.post(url=url, json=payload, params=params)
 
     return response
 

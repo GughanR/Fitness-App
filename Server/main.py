@@ -724,3 +724,24 @@ def delete_workout(token: str, workout_to_delete: schemas.Workout, db: Session =
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return {"detail": "success"}
+
+
+@app.post("/workout", status_code=status.HTTP_200_OK)
+def add_workout(token: str, workout_plan_id, workout: schemas.Workout, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    new_workout = models.Workout(
+        workout_plan_id=workout_plan_id,
+        workout_number=workout.workout_number,
+        workout_name=workout.workout_name
+    )
+    try:
+        db.add(new_workout)
+        db.commit()
+        db.refresh(new_workout)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success"}
