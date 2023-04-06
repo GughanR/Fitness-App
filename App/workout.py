@@ -402,5 +402,20 @@ def add_workout(new_workout, workout_plan_id):
     return response
 
 
+def add_workout_exercise(new_workout_exercise, workout_id):
+    # Save new plan in database
+    params = {
+        "token": get_access_token()["token"],
+        "workout_id": workout_id,
+        "exercise_id": new_workout_exercise.exercise_id,
+        "num": new_workout_exercise.workout_exercise_number
+    }
+    url = Url.workout_exercise
+
+    response = requests.post(url=url, params=params)
+
+    return response
+
+
 if __name__ == "__main__":
     pass

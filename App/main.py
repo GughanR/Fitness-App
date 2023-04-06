@@ -31,7 +31,7 @@ from kivy.resources import resource_add_path, resource_find
 import user
 import json
 import workout
-from kivymd.uix.card.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox
+from kivymd.uix.card.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox, MDSeparator, MDCard
 from kivymd.uix.label import MDLabel
 
 
@@ -65,6 +65,16 @@ class ExerciseCard(MDCardSwipe):
     text = StringProperty()
     image_source = StringProperty()
     exercise = ObjectProperty()
+
+
+class ExerciseCardNormal(MDCard):
+    text = StringProperty()
+    image_source = StringProperty()
+    exercise = ObjectProperty()
+
+
+class MuscleGroupButton(MDFlatButton):
+    text = StringProperty()
 
 
 class Background(FloatLayout):
@@ -670,6 +680,7 @@ class ViewWorkoutsScreen(Screen):
             response = workout.get_workouts_in_plan(self.workout_plan.workout_plan_id)
         except:
             CustomDialog(text="Connection failed")
+            return
         # If error display error message
         if response.status_code != 200:
             CustomDialog(
@@ -740,7 +751,7 @@ class ViewExercisesScreen(Screen):
 
     def on_pre_enter(self, *args):  # Load screen details on screen load
         self.ids.workoutName.text = str(self.workout.workout_name)
-        self.load_cards()
+        self.refresh()
 
     def remove_all_cards(self):
         self.ids.exercisesInWorkoutList.clear_widgets()
@@ -932,6 +943,132 @@ class AddWorkoutScreen(Screen):
         MDApp.get_running_app().root.transition.direction = "right"
         MDApp.get_running_app().root.current = "view_workouts"
 
+
+class MuscleGroupsScreen(Screen):
+    def on_pre_enter(self, *args):
+        self.clear_screen()
+        # Get exercises from server
+        try:
+            response = workout.get_exercises()
+        except:
+            CustomDialog(text="Connection error")
+            return
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+
+        exercises_json = json.loads(response.content.decode("utf-8"))
+        exercises = workout.load_exercises(exercises_json)
+
+        # Get distinct muscle groups
+        muscle_groups = set()
+        for exercise in exercises:
+            muscle_groups.add(exercise.muscle_group)
+        # Sort in alphabetical order
+        muscle_groups = sorted(muscle_groups)
+
+        # Output each muscle group as a button
+        for muscle_group in muscle_groups:
+            button = MuscleGroupButton(
+                text=muscle_group.title()
+            )
+            self.ids.muscleGroupsList.add_widget(button)
+
+    def clear_screen(self):
+        self.ids.muscleGroupsList.clear_widgets()
+
+    def select_button(self, instance):
+        # If a button is pressed show next screen with exercises from selected muscle group
+        muscle_group_selected = instance.text
+        # Change screen
+        MDApp.get_running_app().root.get_screen("add_exercise").muscle_group = muscle_group_selected
+        MDApp.get_running_app().root.transition.direction = "left"
+        MDApp.get_running_app().root.current = "add_exercise"
+
+    def refresh(self):
+        self.on_pre_enter()
+
+
+class AddExerciseScreen(Screen):
+    muscle_group = StringProperty()
+
+    def on_pre_enter(self, *args):
+        self.clear_screen()
+        # Get exercises from server
+        try:
+            response = workout.get_exercises()
+        except:
+            CustomDialog(text="Connection error")
+            return
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+
+        exercises_json = json.loads(response.content.decode("utf-8"))
+        exercises = workout.load_exercises(exercises_json)
+
+        # https://www.pythontutorial.net/python-basics/python-filter-list/
+        muscle_group_exercises = filter(lambda e: e.muscle_group == self.muscle_group.lower(), exercises)
+
+        # Get distinct muscle sub groups
+        muscle_subgroups = set()
+        for exercise in muscle_group_exercises:
+            muscle_subgroups.add(exercise.muscle_subgroup)
+        # Sort in alphabetical order
+        muscle_subgroups = sorted(muscle_subgroups)
+
+        # Output exercises for each muscle subgroup
+        for group in muscle_subgroups:
+            # Add heading
+            if group.lower() != self.muscle_group.lower():
+                heading = MDLabel(
+                    text=group.title()
+                )
+                heading.font_size = MDApp.get_running_app().fs_normal
+                heading.adaptive_height = True
+
+                self.ids.exercisesList.add_widget(heading)
+                self.ids.exercisesList.add_widget(MDSeparator())
+            # Add exercises
+            # Filter subgroup
+            subgroup_exercises = [e for e in exercises if e.muscle_subgroup == group.lower()]
+            # Sort
+            subgroup_exercises = sorted(subgroup_exercises, key=lambda e: e.exercise_name)
+            for exercise in subgroup_exercises:
+                card = ExerciseCardNormal(
+                    text=exercise.exercise_name.title(),
+                    image_source=f"Images/exercises/{exercise.exercise_name.lower()}.png",
+                    exercise=exercise
+                )
+                self.ids.exercisesList.add_widget(card)
+
+            self.ids.exercisesList.add_widget(MDLabel())  # Adds extra space
+
+    def clear_screen(self):
+        self.ids.exercisesList.clear_widgets()
+
+    def select_card(self, instance):
+        # If a card is pressed add exercise
+        # Get details
+        workout_obj = MDApp.get_running_app().root.get_screen("view_exercises").workout
+        # Calculate exercise num
+        exercise_num = len(workout_obj.exercise_list)
+        instance.exercise.workout_exercise_number = exercise_num
+
+        try:
+            response = workout.add_workout_exercise(instance.exercise, workout_obj.workout_id)
+        except:
+            CustomDialog(text="Connection error")
+            return
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+        else:
+            CustomDialog(text=f"Added {instance.exercise.exercise_name.title()} to {workout_obj.workout_name}")
+            MDApp.get_running_app().root.transition.direction = "right"
+            MDApp.get_running_app().root.current = "view_exercises"
+
+    def refresh(self):
+        self.on_pre_enter()
+
+
 class FitnessApp(MDApp):
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
@@ -975,6 +1112,8 @@ class FitnessApp(MDApp):
         sm.add_widget(EditWorkoutPlanScreen(name="edit_workout_plan"))
         sm.add_widget(EditWorkoutScreen(name="edit_workout"))
         sm.add_widget(AddWorkoutScreen(name="add_workout"))
+        sm.add_widget(MuscleGroupsScreen(name="muscle_groups"))
+        sm.add_widget(AddExerciseScreen(name="add_exercise"))
         # sm.current = "main"
 
         # Check if sign in required
