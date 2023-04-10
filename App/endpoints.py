@@ -24,6 +24,9 @@ class Url:
     workout = base + "/workout"
     workout_exercise = base + "/workout-exercise"
 
+    workout_exercise_history = base + "/workout-exercise-history"
+    set_history = base + "/set-history"
+
 
 if __name__ == "__main__":
     print(get_base_url())

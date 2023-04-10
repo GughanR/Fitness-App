@@ -419,7 +419,7 @@ def add_workout_exercise(new_workout_exercise, workout_id):
 
 def check_weight_input(weight):
     try:
-        weight = int(weight)
+        weight = float(weight)
         return (weight > 0) and (weight <= 1000)
     except:
         return False
@@ -431,6 +431,36 @@ def check_reps_input(reps):
         return (reps > 0) and (reps <= 150)
     except:
         return False
+
+
+def add_workout_exercise_history(workout_exercise_id):
+    # Save in database
+    params = {
+        "token": get_access_token()["token"],
+        "workout_exercise_id": workout_exercise_id
+    }
+    url = Url.workout_exercise_history
+
+    response = requests.post(url=url, params=params)
+
+    return response
+
+
+def add_set_history(exercise_history_id, set_number, reps_completed, weight_used, unit_weight):
+    # Save in database
+    params = {
+        "token": get_access_token()["token"],
+        "exercise_history_id": exercise_history_id,
+        "set_number": set_number,
+        "reps_completed": reps_completed,
+        "weight_used": weight_used,
+        "unit_weight": unit_weight
+    }
+    url = Url.set_history
+
+    response = requests.post(url=url, params=params)
+
+    return response
 
 
 if __name__ == "__main__":

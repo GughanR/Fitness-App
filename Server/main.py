@@ -799,3 +799,107 @@ def add_workout_exercise(token: str, workout_id: int, exercise_id: int, num: int
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return {"detail": "success"}
+
+
+@app.post("/workout-exercise-history", status_code=status.HTTP_200_OK)
+def add_workout_exercise_history(token: str, workout_exercise_id: int, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    # Check that workout and access token match to same user
+    statement = (
+        select(models.User)
+        .join(models.AccessToken)
+        .join(models.WorkoutPlan)
+        .join(models.Workout)
+        .join(models.WorkoutExercise)
+        .where(
+            models.WorkoutExercise.workout_exercise_id == workout_exercise_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        # Only one value can be returned
+        user = db.scalars(statement).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden activity.")
+
+    new_workout_exercise_history = models.WorkoutExerciseHistory(
+        workout_exercise_id=workout_exercise_id,
+        sets_completed=0,
+        date_completed=datetime.datetime.now()
+    )
+    try:
+        db.add(new_workout_exercise_history)
+        db.commit()
+        db.refresh(new_workout_exercise_history)
+        new_id = new_workout_exercise_history.exercise_history_id
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success", "exercise_history_id": new_id}
+
+
+@app.post("/set-history", status_code=status.HTTP_200_OK)
+def add_set_history(
+        token: str,
+        exercise_history_id: int,
+        set_number: int,
+        reps_completed: int,
+        weight_used: float,
+        unit_weight: str,
+        db: Session = Depends(get_db)
+):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    # Check that workout and access token match to same user
+    statement = (
+        select(models.User)
+        .join(models.AccessToken)
+        .join(models.WorkoutPlan)
+        .join(models.Workout)
+        .join(models.WorkoutExercise)
+        .join(models.WorkoutExerciseHistory)
+        .where(
+            models.WorkoutExerciseHistory.exercise_history_id == exercise_history_id,
+            models.AccessToken.token == token
+        )
+    )
+    try:
+        # Only one value can be returned
+        user = db.scalars(statement).one()
+    except:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden activity.")
+
+    new_set_history = models.SetHistory(
+        exercise_history_id=exercise_history_id,
+        set_number=set_number,
+        reps_completed=reps_completed,
+        weight_used=weight_used,
+        unit_weight=unit_weight
+    )
+    try:
+        db.add(new_set_history)
+        db.commit()
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    # Increment sets completed by 1
+    statement = (
+        update(models.WorkoutExerciseHistory)
+        .where(
+            models.WorkoutExerciseHistory.exercise_history_id == exercise_history_id
+        )
+        .values(sets_completed=(models.WorkoutExerciseHistory.sets_completed + 1))
+    )
+    try:
+        db.execute(statement)
+        db.commit()
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
+
+    return {"detail": "success"}

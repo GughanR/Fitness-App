@@ -1095,6 +1095,7 @@ class CompleteWorkoutScreen(Screen):
     exercise_queue = []
     exercise_number = 1
     set_number = 1
+    exercise_history_id = 0
 
     def on_enter(self, *args):
         # Create exercise_queue
@@ -1131,6 +1132,8 @@ class CompleteWorkoutScreen(Screen):
     def skip_exercise(self):
         exercise = self.exercise_queue.pop(0)
         self.exercise_queue.append(exercise)
+        # Reset set number
+        self.set_number = 1
         self.show_exercise()
 
     def finish_exercise(self):
@@ -1160,8 +1163,37 @@ class CompleteWorkoutScreen(Screen):
             return
 
         # Save set in database
-        # Check for error
-        CustomDialog(text=f"Saved Set {self.set_number}")
+        # If set number 1 create workout exercise history
+        if self.set_number == 1:
+            try:
+                current_exercise = self.exercise_queue[0]
+                response = workout.add_workout_exercise_history(current_exercise.workout_exercise_id)
+            except:
+                CustomDialog(text="Connection error")
+                return
+            if response.status_code != 200:
+                CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+                return
+            else:
+                self.exercise_history_id = json.loads(response.content.decode("utf-8"))["exercise_history_id"]
+        # Save set history
+        try:
+            current_exercise = self.exercise_queue[0]
+            response = workout.add_set_history(
+                self.exercise_history_id,
+                self.set_number,
+                int(reps_input),
+                float(weight_input),
+                self.ids.weightUnit.text
+            )
+        except:  # Check for error
+            CustomDialog(text="Connection error")
+            return
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+            return
+        else:
+            CustomDialog(text=f"Saved Set {self.set_number}")
         # Clear inputs
         self.ids.weightInput.text = ""
         self.ids.repsInput.text = ""
