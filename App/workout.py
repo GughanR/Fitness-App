@@ -417,5 +417,21 @@ def add_workout_exercise(new_workout_exercise, workout_id):
     return response
 
 
+def check_weight_input(weight):
+    try:
+        weight = int(weight)
+        return (weight > 0) and (weight <= 1000)
+    except:
+        return False
+
+
+def check_reps_input(reps):
+    try:
+        reps = int(reps)
+        return (reps > 0) and (reps <= 150)
+    except:
+        return False
+
+
 if __name__ == "__main__":
-    pass
+    print(check_weight_input(1000))

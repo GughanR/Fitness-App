@@ -948,6 +948,7 @@
         size_hint: [0.21, 0.12]
         pos_hint: {"x":0.74, "y": 0.025}
         md_bg_color: "#5542ff"
+        on_release: root.complete_workout()
         FitImage:
             source: "Images/ARM.png"
 
@@ -1178,3 +1179,135 @@
                 MDList:
                     id: exercisesList
                     spacing: 20
+
+<CompleteExerciseCard>:
+    size_hint_y: None
+    height: root.size[0]*0.7
+    line_color: 0,0,0,1
+    line_width: 1.1
+    adaptive_height: True
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: 5, 10
+        MDBoxLayout:
+            adaptive_height: True
+            MDLabel
+                halign: "center"
+                text: root.text
+        Image:
+            source: root.image_source
+            keep_ratio: True
+            allow_stretch: True
+
+<CompleteWorkoutScreen>:
+    MDScrollView:
+        MDGridLayout:
+            adaptive_height: True
+            cols: 1
+            padding: 40, 20
+            spacing: 40
+            MDBoxLayout:  # Top options buttons
+                adaptive_height: True
+                MDBoxLayout:
+                    size_hint: [0.5,1]
+                    MDIconButton:
+                        icon: "arrow-left"
+                        icon_size: app.fs_normal
+                        on_release:
+                            root.manager.transition.direction = "right"
+                            root.manager.current = "view_exercises"
+            MDLabel:
+                adaptive_height: True
+                text: "Workout 1"
+                font_size: app.fs_heading
+                halign: "center"
+            MDSeparator
+            MDList:
+                id: exerciseBox
+            MDBoxLayout:
+                adaptive_height: True
+                spacing: 10
+                MDFlatButton:
+                    id: skipBtn
+                    size_hint_x: 0.5
+                    text: "Skip"
+                    text_color: 0,0,1,1
+                    font_size: app.fs_normal
+                    md_bg_color: "#ff4d36"
+                    theme_text_color: "Custom"
+                    text_color: "#ffffff"
+                    on_release: root.skip_exercise()
+                MDFlatButton:
+                    size_hint_x: 0.5
+                    text: "Finish"
+                    font_size: app.fs_normal
+                    md_bg_color: "5542ff"
+                    theme_text_color: "Custom"
+                    text_color: "#ffffff"
+                    on_release: root.finish_exercise()
+            MDBoxLayout:
+                adaptive_height: True
+                orientation: "vertical"
+                spacing: 20
+                MDSeparator
+                MDLabel:
+                    id: set
+                    adaptive_height: True
+                    text: "[b]Set 1[/b]"
+                    markup: True
+                    halign: "center"
+                MDSeparator
+                MDBoxLayout:
+                    spacing: 10
+                    adaptive_height: True
+                    MDCard:
+                        padding: 5,0
+                        size_hint: [0.5, 1]
+                        line_color: 0,0,0,1
+                        line_width: 1.1
+                        adaptive_height: True
+                        MDBoxLayout:
+                            MDTextField:
+                                id: weightInput
+                                size_hint_x: 0.6
+                                theme_text_color: "Custom"
+                                line_color_normal: "#ffffff"
+                                halign: "center"
+                            MDLabel:
+                                id: weightUnit
+                                size_hint_x: 0.4
+                                text: "KG"
+                                halign: "center"
+                    MDCard:
+                        padding: 5,0
+                        size_hint: [0.5, 1]
+                        line_color: 0,0,0,1
+                        line_width: 1.1
+                        adaptive_height: True
+                        MDBoxLayout:
+                            MDTextField:
+                                id: repsInput
+                                size_hint_x: 0.6
+                                theme_text_color: "Custom"
+                                line_color_normal: "#ffffff"
+                                halign: "center"
+                            MDLabel:
+                                size_hint_x: 0.4
+                                text: "REPS"
+                                halign: "center"
+            MDFlatButton:
+                size_hint_x: 0.5
+                text: "Save Set"
+                font_size: app.fs_normal
+                md_bg_color: "5542ff"
+                theme_text_color: "Custom"
+                text_color: "#ffffff"
+                on_release: root.save_set()
+
+
+
+
+
+
+
+

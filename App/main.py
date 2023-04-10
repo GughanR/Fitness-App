@@ -33,6 +33,7 @@ import json
 import workout
 from kivymd.uix.card.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox, MDSeparator, MDCard
 from kivymd.uix.label import MDLabel
+from kivymd.uix.banner.banner import MDBanner
 
 
 class DialogBtn(MDFlatButton):
@@ -71,6 +72,11 @@ class ExerciseCardNormal(MDCard):
     text = StringProperty()
     image_source = StringProperty()
     exercise = ObjectProperty()
+
+
+class CompleteExerciseCard(MDCard):
+    text = StringProperty()
+    image_source = StringProperty()
 
 
 class MuscleGroupButton(MDFlatButton):
@@ -462,6 +468,7 @@ class WorkoutPage(MDScrollView):
             CustomDialog(
                 text=json.loads(response.content.decode("utf-8"))["detail"]
             )
+            return
 
         # Convert response str to list
         response_list = json.loads(response.content.decode("utf-8"))
@@ -512,6 +519,7 @@ class WorkoutPage(MDScrollView):
             CustomDialog(
                 text=json.loads(response.content.decode("utf-8"))["detail"]
             )
+            return
         # Convert response str to list
         response_list = json.loads(response.content.decode("utf-8"))
         converted_list = []
@@ -668,6 +676,7 @@ class ViewWorkoutsScreen(Screen):
             CustomDialog(
                 text=json.loads(response.content.decode("utf-8"))["detail"]
             )
+            return
         else:
             self.ids.workoutsInPlanList.remove_widget(instance)
             CustomDialog(text=f"Deleted Workout: \n{instance.workout.workout_name}")
@@ -686,6 +695,7 @@ class ViewWorkoutsScreen(Screen):
             CustomDialog(
                 text=json.loads(response.content.decode("utf-8"))["detail"]
             )
+            return
         # Convert response str to list
         response_list = json.loads(response.content.decode("utf-8"))
 
@@ -727,6 +737,7 @@ class ViewWorkoutsScreen(Screen):
             CustomDialog(
                 text=json.loads(response.content.decode("utf-8"))["detail"]
             )
+            return
         # Convert response str to list
         response_list = json.loads(response.content.decode("utf-8"))
         converted_list = []
@@ -785,6 +796,7 @@ class ViewExercisesScreen(Screen):
             CustomDialog(
                 text=json.loads(response.content.decode("utf-8"))["detail"]
             )
+            return
         # Convert response str to list
         response_list = json.loads(response.content.decode("utf-8"))
 
@@ -814,6 +826,12 @@ class ViewExercisesScreen(Screen):
 
     def select_card(self, instance):
         pass
+
+    def complete_workout(self):
+        # Change screen
+        MDApp.get_running_app().root.get_screen("complete_workout").workout = self.workout
+        MDApp.get_running_app().root.transition.direction = "left"
+        MDApp.get_running_app().root.current = "complete_workout"
 
 
 class EditWorkoutPlanScreen(Screen):
@@ -936,6 +954,7 @@ class AddWorkoutScreen(Screen):
         # Output error message
         if response.status_code != 200:
             CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+            return
         else:
             # Output success message
             CustomDialog(text="Added Workout")
@@ -955,6 +974,7 @@ class MuscleGroupsScreen(Screen):
             return
         if response.status_code != 200:
             CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+            return
 
         exercises_json = json.loads(response.content.decode("utf-8"))
         exercises = workout.load_exercises(exercises_json)
@@ -1001,6 +1021,7 @@ class AddExerciseScreen(Screen):
             return
         if response.status_code != 200:
             CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+            return
 
         exercises_json = json.loads(response.content.decode("utf-8"))
         exercises = workout.load_exercises(exercises_json)
@@ -1069,6 +1090,88 @@ class AddExerciseScreen(Screen):
         self.on_pre_enter()
 
 
+class CompleteWorkoutScreen(Screen):
+    workout = workout.Workout()
+    exercise_queue = []
+    exercise_number = 1
+    set_number = 1
+
+    def on_enter(self, *args):
+        # Create exercise_queue
+
+        # Get exercises from server
+        exercises = self.workout.exercise_list
+
+        # Group exercises in terms of muscle group
+        grouped_exercises = sorted(exercises, key=lambda e: e.muscle_group)
+        exercise_queue = []
+        for exercise in grouped_exercises:
+            if exercise.compound:
+                exercise_queue.insert(0, exercise)
+            else:
+                exercise_queue.append(exercise)
+
+        # Save exercise queue
+        self.exercise_queue = exercise_queue
+
+        # Show first exercise
+        self.show_exercise()
+
+        # Show weight unit
+        self.ids.weightUnit.text = user.get_user_details()["unit_weight"]
+
+    def show_exercise(self):
+        exercise_card = CompleteExerciseCard(
+            text=f"{self.exercise_queue[0].exercise_name} ({self.exercise_number}/{len(self.workout.exercise_list)})",
+            image_source=f"Images/exercises/{self.exercise_queue[0].exercise_name}.png"
+        )
+        self.ids.exerciseBox.clear_widgets()
+        self.ids.exerciseBox.add_widget(exercise_card)
+
+    def skip_exercise(self):
+        exercise = self.exercise_queue.pop(0)
+        self.exercise_queue.append(exercise)
+        self.show_exercise()
+
+    def finish_exercise(self):
+        self.exercise_queue.pop(0)
+        self.exercise_number += 1
+        self.show_exercise()
+        # Enable skip button
+        self.ids.skipBtn.disabled = False
+        # Reset set number
+        self.set_number = 1
+        self.ids.set.text = f"[b]Set {self.set_number}[/b]"
+
+    def check_workout_complete(self):
+        if len(self.exercise_queue) == 0:
+            print("Done")
+
+    def save_set(self):
+        # Get inputs
+        weight_input = self.ids.weightInput.text
+        reps_input = self.ids.repsInput.text
+        # Check inputs
+        if not workout.check_weight_input(weight_input):
+            CustomDialog(text="Invalid Weight")
+            return
+        if not workout.check_reps_input(reps_input):
+            CustomDialog(text="Invalid Repetitions")
+            return
+
+        # Save set in database
+        # Check for error
+        CustomDialog(text=f"Saved Set {self.set_number}")
+        # Clear inputs
+        self.ids.weightInput.text = ""
+        self.ids.repsInput.text = ""
+        # Increase set number by 1
+        self.set_number += 1
+        self.ids.set.text = f"[b]Set {self.set_number}[/b]"
+        # Disable skip button
+        self.ids.skipBtn.disabled = True
+
+
 class FitnessApp(MDApp):
     Builder.load_file("My.kv")  # Load kivy file into main.py
 
@@ -1079,6 +1182,7 @@ class FitnessApp(MDApp):
     Window.top = 0
     Window.left = 0
     Window.borderless = True
+    Window.softinput_mode = "below_target"
     MDApp.title = "Fitness App"
     # Set font sizes
     font_size_coefficient = Window.size[0] / 500
@@ -1114,13 +1218,12 @@ class FitnessApp(MDApp):
         sm.add_widget(AddWorkoutScreen(name="add_workout"))
         sm.add_widget(MuscleGroupsScreen(name="muscle_groups"))
         sm.add_widget(AddExerciseScreen(name="add_exercise"))
+        sm.add_widget(CompleteWorkoutScreen(name="complete_workout"))
         # sm.current = "main"
 
         # Check if sign in required
         if user.check_access_token():
             sm.current = "main"
-        else:
-            print(False)
         # sm.current = "main"  # DEBUG
         # sm.screens[5].children[0].children[1].current = "Account"  # DEBUG
         return sm
