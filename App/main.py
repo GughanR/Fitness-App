@@ -1138,6 +1138,13 @@ class CompleteWorkoutScreen(Screen):
 
     def finish_exercise(self):
         self.exercise_queue.pop(0)
+
+        if self.check_workout_complete():
+            CustomDialog(text="Workout Completed!")
+            MDApp.get_running_app().root.transition.direction = "right"
+            MDApp.get_running_app().root.current = "main"
+            return
+
         self.exercise_number += 1
         self.show_exercise()
         # Enable skip button
@@ -1148,7 +1155,9 @@ class CompleteWorkoutScreen(Screen):
 
     def check_workout_complete(self):
         if len(self.exercise_queue) == 0:
-            print("Done")
+            return True
+        else:
+            return False
 
     def save_set(self):
         # Get inputs
