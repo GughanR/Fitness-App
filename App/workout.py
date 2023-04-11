@@ -56,6 +56,17 @@ class Workout:
         self.exercise_list = data.get("exercise_list", [])
 
 
+class ExerciseHistory:
+    def __init__(self, data: dict = {}):
+        # Given dictionary will be used to add attributes
+        # If no dict given then default dict will be empty
+        self.weight_used = data.get("weight_used")
+        self.unit_weight = data.get("unit_weight")
+        self.reps_completed = data.get("reps_completed")
+        self.set_number = data.get("set_number")
+        self.date_completed = data.get("date_completed")
+
+
 def convert_to_json(py_obj):  # TODO: Document this algorithm
     json_data = {}
     for key, value in py_obj.__dict__.items():
@@ -109,6 +120,13 @@ def convert_workout_plan(workout_plan_json):
     workout_plan_obj.workout_list = workout_obj_list
 
     return workout_plan_obj
+
+
+def convert_exercise_history(exercise_history_list):
+    obj_list = []
+    for json_obj in exercise_history_list:
+        obj_list.append(ExerciseHistory(json_obj))
+    return obj_list
 
 
 def check_plan_name(name):
@@ -463,5 +481,153 @@ def add_set_history(exercise_history_id, set_number, reps_completed, weight_used
     return response
 
 
+def get_exercise_history(exercise_id):
+    params = {
+        "token": get_access_token()["token"],
+        "exercise_id": exercise_id
+    }
+    url = Url.set_history
+
+    response = requests.get(url=url, params=params)
+
+    return response
+
+
+def exercise_reps(exercise, goal):
+    average = (exercise.min_reps + exercise.max_reps) / 2
+    if goal == "strength":
+        min_reps = exercise.min_reps
+        max_reps = int(average)
+    elif goal == "size":
+        min_reps = int(average)
+        max_reps = exercise.max_reps
+    else:
+        min_reps = exercise.min_reps
+        max_reps = exercise.max_reps
+    return min_reps, max_reps
+
+
+def linear_regression(x_values, y_values, given_x):
+    try:
+        # Get data required
+        sum_x = sum(x_values)
+        sum_y = sum(y_values)
+        sum_xy = 0
+        sum_x2 = 0
+        for i in range(len(x_values)):
+            sum_xy += x_values[i] * y_values[i]
+            sum_x2 += x_values[i] ** 2
+        n = len(x_values)
+
+        # Regression coefficient
+        S_xy = sum_xy - (sum_x * sum_y) / n
+        S_xx = sum_x2 - (sum_x ** 2) / n
+        b = S_xy / S_xx
+
+        # Get a
+        a = (sum_y / n) - (sum_x / n) * b
+
+        # Estimate
+        y_est = a + given_x * b
+    except ZeroDivisionError:
+        y_est = 0
+
+    return y_est
+
+
+def calculate_weight(exercise, exercise_history, current_set, last_set, goal):
+    # Calculate min and max reps for exercise
+    min_reps, max_reps = exercise_reps(exercise, goal)
+
+    if current_set == 1:
+        # Convert to kg
+        for e in exercise_history:
+            if e.unit_weight != "KG":
+                e.weight_used = e.weight_used/2.205
+
+        # Calculate data
+        first_set_history = [e for e in exercise_history if e.set_number == 1]
+        workout_nums = [x for x in range(1, len(first_set_history)+1)]
+        weight_history = [e.weight_used for e in first_set_history]
+
+        # Use regression for new weight
+        new_weight = linear_regression(workout_nums, weight_history, len(workout_nums)+1)
+
+        # Get weight used in first set of last workout
+        last_weight_used = first_set_history[-1].weight_used
+        # Get last reps performed in first set of last workout
+        last_reps_performed = first_set_history[-1].reps_completed
+
+        # Check that user will perform more than before
+        if new_weight <= last_weight_used:
+            if last_reps_performed >= max_reps:
+                new_weight = last_weight_used + 2
+            else:
+                new_weight = last_weight_used
+    else:
+        # If set is not the first
+        new_weight = last_set.weight_used
+        last_reps_performed = last_set.reps_completed
+        # Edit weight based on last performance
+        if last_reps_performed >= max_reps:
+            new_weight += 2
+        elif last_reps_performed < min_reps:
+            new_weight -= 2
+
+    return new_weight
+
+
+def calculate_reps(exercise, exercise_history, current_set, weight, last_set, goal):
+    # Get rep ranges
+    min_reps, max_reps = exercise_reps(exercise, goal)
+
+    if current_set == 1:
+        # Convert to kg
+        for e in exercise_history:
+            if e.unit_weight != "KG":
+                e.weight_used = e.weight_used / 2.205
+
+        # Calculate data
+        first_set_history = [e for e in exercise_history if e.set_number == 1]
+        exercise_history_for_weight = [e for e in first_set_history if e.weight_used == weight]
+        workout_nums = [x for x in range(1, len(exercise_history_for_weight) + 1)]
+        rep_history_for_weight = [e.reps_completed for e in exercise_history_for_weight]
+
+        # Check if user has done weight before
+        if len(exercise_history_for_weight) == 0:
+            return min_reps
+
+        # Use regression for reps
+        new_reps = int(linear_regression(workout_nums, rep_history_for_weight, len(workout_nums)+1))
+
+        # Check that user does more than last time
+        last_reps_performed = rep_history_for_weight[-1]
+        if new_reps <= last_reps_performed:
+            new_reps = last_reps_performed + 1
+    else:
+        # Keeps reps same from last set
+        new_reps = last_set.reps_completed
+
+    return new_reps
+
+
 if __name__ == "__main__":
-    print(check_weight_input(1000))
+    response = get_exercise_history(31)
+    l = json.loads(response.content.decode("utf-8"))
+    l = convert_exercise_history(l)
+    e = Exercise()
+    e.min_reps = 2
+    e.max_reps = 10
+    h = ExerciseHistory()
+    h.reps_completed=9
+    h.weight_used=20
+
+    print(calculate_weight(e, l, 1, h, "size"))
+    print(calculate_reps(e, l, 2, 5, h, "size"))
+
+
+    linear_regression(
+        [1, 2, 5, 7, 8, 9, 10],
+        [7, 9, 13, 15, 14, 17, 20],
+        2
+    )

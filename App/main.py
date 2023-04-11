@@ -829,7 +829,7 @@ class ViewExercisesScreen(Screen):
 
     def complete_workout(self):
         # Change screen
-        MDApp.get_running_app().root.get_screen("complete_workout").workout = self.workout
+        MDApp.get_running_app().root.get_screen("complete_workout").workout_obj = self.workout
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "complete_workout"
 
@@ -1091,17 +1091,25 @@ class AddExerciseScreen(Screen):
 
 
 class CompleteWorkoutScreen(Screen):
-    workout = workout.Workout()
+    workout_obj = workout.Workout()
     exercise_queue = []
     exercise_number = 1
     set_number = 1
     exercise_history_id = 0
+    last_set = workout.ExerciseHistory()
+    goal = StringProperty()
+    exercise_history = []
 
     def on_enter(self, *args):
-        # Create exercise_queue
+        # Set title
+        self.ids.title.text = self.workout_obj.workout_name
 
+        # Get goal from workouts screen
+        self.goal = MDApp.get_running_app().root.get_screen("view_workouts").workout_plan.workout_plan_goal
+
+        # Create exercise_queue
         # Get exercises from server
-        exercises = self.workout.exercise_list
+        exercises = self.workout_obj.exercise_list
 
         # Group exercises in terms of muscle group
         grouped_exercises = sorted(exercises, key=lambda e: e.muscle_group)
@@ -1121,13 +1129,30 @@ class CompleteWorkoutScreen(Screen):
         # Show weight unit
         self.ids.weightUnit.text = user.get_user_details()["unit_weight"]
 
+    def on_pre_leave(self, *args):
+        # Reset inputs and variables
+        self.output_weight_reps("", "")
+        self.set_number = 1
+        self.workout_obj = workout.Workout()
+        self.exercise_queue = []
+        self.exercise_number = 1
+        self.set_number = 1
+        self.exercise_history_id = 0
+        self.last_set = workout.ExerciseHistory()
+        self.goal = ""
+        self.exercise_history = []
+        self.ids.set.text = f"[b]Set {self.set_number}[/b]"
+        self.ids.skipBtn.disabled = False
+
     def show_exercise(self):
         exercise_card = CompleteExerciseCard(
-            text=f"{self.exercise_queue[0].exercise_name} ({self.exercise_number}/{len(self.workout.exercise_list)})",
+            text=f"{self.exercise_queue[0].exercise_name} ({self.exercise_number}/{len(self.workout_obj.exercise_list)})",
             image_source=f"Images/exercises/{self.exercise_queue[0].exercise_name}.png"
         )
         self.ids.exerciseBox.clear_widgets()
         self.ids.exerciseBox.add_widget(exercise_card)
+        # Show new recommended weight and reps
+        self.calculate_weight_reps()
 
     def skip_exercise(self):
         exercise = self.exercise_queue.pop(0)
@@ -1158,6 +1183,21 @@ class CompleteWorkoutScreen(Screen):
             return True
         else:
             return False
+
+    def get_history(self):
+        # Get history for current exercise
+        try:
+            current_exercise = self.exercise_queue[0]
+            response = workout.get_exercise_history(current_exercise.exercise_id)
+        except:
+            CustomDialog(text="Connection error")
+            return
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+            return
+        history_json = json.loads(response.content.decode("utf-8"))
+        # Save history
+        self.exercise_history = workout.convert_exercise_history(history_json)
 
     def save_set(self):
         # Get inputs
@@ -1211,6 +1251,83 @@ class CompleteWorkoutScreen(Screen):
         self.ids.set.text = f"[b]Set {self.set_number}[/b]"
         # Disable skip button
         self.ids.skipBtn.disabled = True
+        # Save to last_set
+        if self.ids.weightUnit.text != "KG":  # Convert to KG
+            weight_used = float(weight_input)/2.205
+        else:
+            weight_used = float(weight_input)
+        self.last_set = workout.ExerciseHistory(
+            {
+                "weight_used": weight_used,
+                "reps_completed": int(reps_input)
+            }
+        )
+        # Show new recommended weight and reps
+        self.calculate_weight_reps()
+
+    def calculate_weight_reps(self):
+        self.get_history()
+        exercise_history = self.exercise_history
+
+        # Convert to KG
+        for e in exercise_history:
+            if e.unit_weight != "KG":
+                e.weight_used = e.weight_used/2.205
+        # If no history, then output nothing
+        if len(exercise_history) == 0:
+            self.output_weight_reps("", "")
+            return
+
+        # Get number of workouts
+        # Exercise in workout can only have one occurrence where set number = 1
+        total_workouts = len([e for e in exercise_history if e.set_number == 1])
+
+        # Do simpler calculation if less than 5 workouts
+        if total_workouts < 5:
+            min_reps, max_reps = workout.exercise_reps(self.exercise_queue[0], self.goal)
+
+            if self.set_number == 1:
+                # Get previous reps and weight used from last workout
+                first_set_history = [e for e in exercise_history if e.set_number == 1]
+                previous_reps = first_set_history[-1].reps_completed
+                previous_weight = first_set_history[-1].weight_used
+
+                if previous_reps < max_reps:
+                    reps = previous_reps + 1
+                    weight = previous_weight
+                else:
+                    reps = min_reps
+                    weight = previous_weight + 2
+            else:
+                # Use reps and weight from last set
+                reps = self.last_set.reps_completed
+                weight = self.last_set.weight_used
+        else:
+            # Calculate weight using algorithm
+            # Using self.exercise_history because function will convert to KG again
+            weight = workout.calculate_weight(
+                self.exercise_queue[0],
+                self.exercise_history,
+                self.set_number,
+                self.last_set,
+                self.goal
+            )
+            reps = workout.calculate_reps(
+                self.exercise_queue[0],
+                self.exercise_history,
+                self.set_number,
+                weight,
+                self.last_set,
+                self.goal
+            )
+            print(self.last_set.weight_used, self.last_set.reps_completed)
+
+        # Output
+        self.output_weight_reps(weight, int(reps))
+
+    def output_weight_reps(self, weight, reps):
+        self.ids.weightInput.text = str(weight)
+        self.ids.repsInput.text = str(reps)
 
 
 class FitnessApp(MDApp):

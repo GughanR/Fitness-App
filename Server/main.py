@@ -353,8 +353,6 @@ def add_workout_plan(token: str, workout_plan: schemas.WorkoutPlan, db: Session 
         print(e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
-    return user_id
-
 
 @app.get("/workout-plan", status_code=status.HTTP_200_OK)
 def get_workout_plans(token: str, db: Session = Depends(get_db)):
