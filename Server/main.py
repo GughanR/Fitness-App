@@ -903,3 +903,37 @@ def add_set_history(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
     return {"detail": "success"}
+
+
+@app.get("/set-history", status_code=status.HTTP_200_OK)
+def get_exercise_history(token: str, exercise_id: int, db: Session = Depends(get_db)):
+    if not check_valid_token(db, token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
+
+    statement = (
+        select(
+            models.SetHistory.weight_used,
+            models.SetHistory.unit_weight,
+            models.SetHistory.reps_completed,
+            models.SetHistory.set_number,
+            models.WorkoutExerciseHistory.date_completed
+        )
+        .join(models.WorkoutExerciseHistory)
+        .join(models.WorkoutExercise)
+        .join(models.Workout)
+        .join(models.WorkoutPlan)
+        .join(models.User)
+        .join(models.AccessToken)
+        .where(
+            models.AccessToken.token == token,
+            models.WorkoutExercise.exercise_id == exercise_id
+        )
+        .order_by("date_completed")
+    )
+    try:
+        history = db.execute(statement).all()
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server error.")
+
+    return history
