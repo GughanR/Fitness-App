@@ -1320,13 +1320,16 @@ class CompleteWorkoutScreen(Screen):
                 self.last_set,
                 self.goal
             )
-            print(self.last_set.weight_used, self.last_set.reps_completed)
 
         # Output
         self.output_weight_reps(weight, int(reps))
 
     def output_weight_reps(self, weight, reps):
-        self.ids.weightInput.text = str(weight)
+        # Convert from KG
+        if self.ids.weightUnit.text != "KG":
+            self.ids.weightInput.text = str(weight*2.205)
+        else:
+            self.ids.weightInput.text = str(weight)
         self.ids.repsInput.text = str(reps)
 
 
