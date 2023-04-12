@@ -1370,58 +1370,66 @@ class ViewProgressPage(MDScrollView):
         self.ids.graphBox.add_widget(FigureCanvasKivyAgg(graph))
 
     def process_stats(self):
-        statistic = self.ids.statDropDown.text.lower()
-        start_date = self.date_range[0]
-        end_date = self.date_range[-1]
-        # Get exercise history
         try:
-            # Get exercise id of selected exercise
-            exercise_id = [e.exercise_id for e in self.exercises if e.exercise_name == statistic][0]
-            response = workout.get_exercise_history(exercise_id)
-        except:  # Check for error
-            CustomDialog(text="Connection error")
-            return
-        if response.status_code != 200:
-            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
-            return
+            statistic = self.ids.statDropDown.text.lower()
+            # Check that statistic isn't None
+            if statistic == "none":
+                CustomDialog(text="Please choose an exercise")
+                return
+            start_date = self.date_range[0]
+            end_date = self.date_range[-1]
+            # Get exercise history
+            try:
+                # Get exercise id of selected exercise
+                exercise_id = [e.exercise_id for e in self.exercises if e.exercise_name == statistic][0]
+                response = workout.get_exercise_history(exercise_id)
+            except:  # Check for error
+                CustomDialog(text="Connection error")
+                return
+            if response.status_code != 200:
+                CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+                return
 
-        history_json = json.loads(response.content.decode("utf-8"))
+            history_json = json.loads(response.content.decode("utf-8"))
 
-        # Save history
-        exercise_history = workout.convert_exercise_history(history_json)
-        # Convert weight to KG
-        # Convert dates
-        for e in exercise_history:
-            if e.unit_weight != "KG":
-                e.weight_used = e.weight_used/2.205
+            # Save history
+            exercise_history = workout.convert_exercise_history(history_json)
+            # Convert weight to KG
+            # Convert dates
+            for e in exercise_history:
+                if e.unit_weight != "KG":
+                    e.weight_used = e.weight_used/2.205
 
-            date_time = e.date_completed.replace("T", " ")
-            date_time = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M:%S")
-            e.date_completed = date_time.date()
+                date_time = e.date_completed.replace("T", " ")
+                date_time = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M:%S")
+                e.date_completed = date_time.date()
 
-        # Order list
-        exercise_history = sorted(exercise_history, key=lambda e: e.date_completed)
+            # Order list
+            exercise_history = sorted(exercise_history, key=lambda e: e.date_completed)
 
-        # Create x and y data
-        x = []
-        y = []
+            # Create x and y data
+            x = []
+            y = []
 
-        # Get highest weight used in each workout
-        for e in exercise_history:
-            if e.date_completed not in x:
-                x.append(e.date_completed)
-                y.append(e.weight_used)
-            else:
-                original_index = x.index(e.date_completed)
-                current_weight = y[original_index]
-                if e.weight_used > current_weight:
-                    y[original_index] = e.weight_used
+            # Get highest weight used in each workout
+            for e in exercise_history:
+                if e.date_completed not in x:
+                    x.append(e.date_completed)
+                    y.append(e.weight_used)
+                else:
+                    original_index = x.index(e.date_completed)
+                    current_weight = y[original_index]
+                    if e.weight_used > current_weight:
+                        y[original_index] = e.weight_used
 
-        # Plot graph
-        print(x, y)
-        graph = view_progress.plot_graph(x, y, self.date_range)
+            # Plot graph
+            print(x, y)
+            graph = view_progress.plot_graph(x, y, self.date_range)
 
-        self.draw_graph(graph)
+            self.draw_graph(graph)
+
+        except IndexError:
+            CustomDialog(text="Invalid date range")
 
 
 
