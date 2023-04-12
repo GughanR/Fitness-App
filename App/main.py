@@ -1,5 +1,8 @@
 # உ
+import datetime
+
 import kivy
+import numpy as np
 
 from kivy.app import App
 from kivy.resources import resource_find
@@ -33,7 +36,10 @@ import json
 import workout
 from kivymd.uix.card.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox, MDSeparator, MDCard
 from kivymd.uix.label import MDLabel
-from kivymd.uix.banner.banner import MDBanner
+from kivymd.uix.pickers import MDDatePicker
+from kivy.garden.matplotlib import FigureCanvasKivyAgg
+from matplotlib import pyplot as plt
+import view_progress
 
 
 class DialogBtn(MDFlatButton):
@@ -291,6 +297,12 @@ class MainScreen(Screen):
         cards_on_screen = self.children[0].children[1].screens[1].children[0].children[0].children[0].children
         if len(cards_on_screen) == 0:  # Only refresh if no cards on screen
             WorkoutPage.refresh(self.children[0].children[1].screens[1].children[0])
+
+        # # View Progress Page
+        # # Load dummy graph
+        # stat_text = self.children[0].children[1].screens[0].children[0].statDropDown.text
+        # if stat_text == "None":
+        #     ViewProgressPage.g(self.children[0].children[1].screens[0].children[0])
 
 
 class AccountPage(MDScrollView):
@@ -1322,7 +1334,7 @@ class CompleteWorkoutScreen(Screen):
             )
 
         # Output
-        self.output_weight_reps(weight, int(reps))
+        self.output_weight_reps(round(weight, 2), int(reps))
 
     def output_weight_reps(self, weight, reps):
         # Convert from KG
@@ -1331,6 +1343,145 @@ class CompleteWorkoutScreen(Screen):
         else:
             self.ids.weightInput.text = str(weight)
         self.ids.repsInput.text = str(reps)
+
+
+class ViewProgressPage(MDScrollView):
+    statDropDown = ObjectProperty()
+    date_range = []
+    exercises = []
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def show_date_picker(self):
+        self.date_dialog = MDDatePicker(
+            mode="range",
+            primary_color="#5542ff",
+            text_button_color="#5542ff",
+            selector_color="#5542ff"
+        )
+        self.date_dialog.bind(
+            on_save=self.save_date
+        )
+        self.date_dialog.open()
+
+    def draw_graph(self, graph):
+        self.ids.graphBox.clear_widgets()
+        self.ids.graphBox.add_widget(FigureCanvasKivyAgg(graph))
+
+    def process_stats(self):
+        statistic = self.ids.statDropDown.text.lower()
+        start_date = self.date_range[0]
+        end_date = self.date_range[-1]
+        # Get exercise history
+        try:
+            # Get exercise id of selected exercise
+            exercise_id = [e.exercise_id for e in self.exercises if e.exercise_name == statistic][0]
+            response = workout.get_exercise_history(exercise_id)
+        except:  # Check for error
+            CustomDialog(text="Connection error")
+            return
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+            return
+
+        history_json = json.loads(response.content.decode("utf-8"))
+
+        # Save history
+        exercise_history = workout.convert_exercise_history(history_json)
+        # Convert weight to KG
+        # Convert dates
+        for e in exercise_history:
+            if e.unit_weight != "KG":
+                e.weight_used = e.weight_used/2.205
+
+            date_time = e.date_completed.replace("T", " ")
+            date_time = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M:%S")
+            e.date_completed = date_time.date()
+
+        # Order list
+        exercise_history = sorted(exercise_history, key=lambda e: e.date_completed)
+
+        # Create x and y data
+        x = []
+        y = []
+
+        # Get highest weight used in each workout
+        for e in exercise_history:
+            if e.date_completed not in x:
+                x.append(e.date_completed)
+                y.append(e.weight_used)
+            else:
+                original_index = x.index(e.date_completed)
+                current_weight = y[original_index]
+                if e.weight_used > current_weight:
+                    y[original_index] = e.weight_used
+
+        # Plot graph
+        print(x, y)
+        graph = view_progress.plot_graph(x, y, self.date_range)
+
+        self.draw_graph(graph)
+
+
+
+
+
+
+
+
+    def save_date(self, instance, value, date_range):
+        # Output selected date
+        self.ids.dateRange.text = instance.ids.label_full_date.text
+        # Get start and end date
+        start = date_range[0]
+        end = date_range[-1]
+        # Save date range list
+        self.date_range = date_range
+
+    def show_statistics(self):
+        # Get exercises from server
+        try:
+            response = workout.get_exercises()
+        except:
+            CustomDialog(text="Connection error")
+            return
+        if response.status_code != 200:
+            CustomDialog(text=json.loads(response.content.decode("utf-8"))["detail"])
+            return
+
+        exercises_json = json.loads(response.content.decode("utf-8"))
+        exercises = workout.load_exercises(exercises_json)
+
+        # Order exercises
+        exercises = sorted(exercises, key=lambda e: e.exercise_name)
+        # Save exercises locally
+        self.exercises = exercises
+
+        # Create Drop down items
+        self.list_items = []
+        # Add each exercise item
+        for exercise in exercises:
+            name = exercise.exercise_name.title()
+            item = {
+                "viewclass": "OneLineListItem",
+                "text": name,
+                "halign": "center",
+                "on_release": lambda x=name: self.update_stat(x)
+            }
+            self.list_items.append(item)
+
+        # Drop down settings
+        self.drop_down = MDDropdownMenu(
+            caller=self.ids.statDropDown,
+            items=self.list_items,
+            width_mult=4
+        )
+        self.drop_down.open()
+
+    def update_stat(self, text):
+        self.ids.statDropDown.text = text.title()
+        self.drop_down.dismiss()
 
 
 class FitnessApp(MDApp):

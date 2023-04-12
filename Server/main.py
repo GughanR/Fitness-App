@@ -4,7 +4,7 @@ import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import select, update, and_, or_, delete
+from sqlalchemy import select, update, and_, or_, delete, distinct
 import random
 import json
 import string
