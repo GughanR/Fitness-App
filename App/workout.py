@@ -67,7 +67,7 @@ class ExerciseHistory:
         self.date_completed = data.get("date_completed")
 
 
-def convert_to_json(py_obj):  # TODO: Document this algorithm
+def convert_to_json(py_obj):
     json_data = {}
     for key, value in py_obj.__dict__.items():
         if type(value) == list:

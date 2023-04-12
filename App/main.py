@@ -429,7 +429,7 @@ class AccountPage(MDScrollView):
             )
 
 
-class ChangePasswordScreen(Screen):  # TODO add password check
+class ChangePasswordScreen(Screen):
     dialog = ObjectProperty(None)
 
     def reset_inputs(self):
@@ -443,7 +443,7 @@ class ChangePasswordScreen(Screen):  # TODO add password check
         new_pw = self.ids.newPWInput.text
         response = user.check_password(new_pw)
 
-        if response != True:
+        if type(response) == str:
             self.ids.newPWInput.helper_text = response
             return
 
@@ -656,7 +656,7 @@ class CreateWorkoutScreen(Screen):
             plan_name=self.ids.planNameInput.text,
             num_of_days=int(self.ids.numOfDaysInput.text)
         )
-        # TODO: Show user plan before saving
+
         response = workout.save_new_plan(new_workout_plan)
         if response.status_code != 200:
             CustomDialog(text="Connection failed")

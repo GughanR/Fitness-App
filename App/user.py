@@ -56,51 +56,6 @@ def check_password(password):
     return True
 
 
-#########################################################
-def check_valid_details(name, email, username, password):
-    alphabet = list(string.ascii_letters)
-    for char in name:
-        if char not in alphabet:
-            if ((char != " ") and (char != "'")):
-                return {""}
-
-    digits = "1234567890"
-    digits = list(digits)
-    email_valid_char = [
-        "!", "#", "$", "%", "&", "'", " *", "+", "-",
-        "/", "=", "?", "^", "_", "`", "{", "|", "}", "~"
-    ]
-    for char in email:
-        if char in (alphabet + digits + email_valid_char):
-            return False
-    num_of_ats = email.count("@")
-    num_of_dots = email.count(".")
-    if num_of_ats != 1 or num_of_dots == 0:
-        return False
-
-    for char in username:
-        if char not in alphabet:
-            return False
-
-    if len(password) < 8:
-        return False
-    contains_number = False
-    for digit in digits:
-        if digit in password:
-            contains_number = True
-    if contains_number == False:
-        return False
-
-
-#########################################################
-
-def is_email(user_input):  # TODO Delete
-    if "@" in user_input:
-        return True
-    else:
-        return False
-
-
 def get_access_token():
     with open(os.path.join(CACHE_DIR, "access_token.json")) as json_file:
         try:
@@ -125,6 +80,7 @@ def login(username, password):
             json_file.write(access_token)
 
     return response
+
 
 def create_account(full_name, email_address, user_name, password):
     payload = {
