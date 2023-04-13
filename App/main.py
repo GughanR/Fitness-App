@@ -1439,13 +1439,16 @@ class ViewProgressPage(MDScrollView):
 
 
     def save_date(self, instance, value, date_range):
-        # Output selected date
-        self.ids.dateRange.text = instance.ids.label_full_date.text
-        # Get start and end date
-        start = date_range[0]
-        end = date_range[-1]
-        # Save date range list
-        self.date_range = date_range
+        try:
+            # Output selected date
+            self.ids.dateRange.text = instance.ids.label_full_date.text
+            # Get start and end date
+            start = date_range[0]
+            end = date_range[-1]
+            # Save date range list
+            self.date_range = date_range
+        except:
+            CustomDialog(text="Invalid date range")
 
     def show_statistics(self):
         # Get exercises from server
