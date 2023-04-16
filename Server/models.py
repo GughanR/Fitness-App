@@ -1,3 +1,4 @@
+# This file contains definitions for database tables and relationships
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float
 from sqlalchemy.orm import relationship
 

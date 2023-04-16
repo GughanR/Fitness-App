@@ -1,13 +1,14 @@
+# This module is used to store the endpoints used to contact the server
 import json
 
 
-def get_base_url():
+def get_base_url():  # Gets the base url from server.json
     with open("server.json") as json_file:
         data = json.load(json_file)
         return data["base_url"]
 
 
-class Url:
+class Url:  # Stores the actual endpoints
     base = get_base_url()
     login = base+"/user/login"
     create_user = base+"/user/create/add"
@@ -26,7 +27,3 @@ class Url:
 
     workout_exercise_history = base + "/workout-exercise-history"
     set_history = base + "/set-history"
-
-
-if __name__ == "__main__":
-    print(get_base_url())

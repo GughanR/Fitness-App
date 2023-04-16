@@ -1,3 +1,4 @@
+# This file manages the requests sent to the server and executes SQL commands
 from fastapi import FastAPI, Depends, Response, status, HTTPException
 import schemas
 import models
@@ -16,7 +17,7 @@ app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
 
 
-def get_db():
+def get_db():  # Used to get database session
     db = SessionLocal()
     try:
         yield db
@@ -24,11 +25,11 @@ def get_db():
         db.close
 
 
-def generate_code():
+def generate_code():  # Creates verification code
     return random.randint(100000, 999999)
 
 
-def check_verification(email, code):
+def check_verification(email, code):  # Checks user code with file
     with open("new_emails.json", "r+", encoding="utf-8") as json_file:
         try:
             data = json.load(json_file)
@@ -44,7 +45,7 @@ def check_verification(email, code):
             return False
 
 
-def generate_access_token():
+def generate_access_token():  # Creates access token
     alphabet = string.ascii_letters
     numbers = string.digits
     punctuation = string.punctuation
@@ -55,7 +56,7 @@ def generate_access_token():
     return access_token
 
 
-def check_valid_token(db, token):
+def check_valid_token(db, token):  # Checks if token is valid
     try:
         statement_2 = (
             select(models.AccessToken.expiry_time)
@@ -68,13 +69,12 @@ def check_valid_token(db, token):
         else:
             return False
 
-
     except Exception as e:
         print(e)
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT, detail="Invalid token.")
 
 
-@app.post("/user/create/add", status_code=status.HTTP_200_OK)
+@app.post("/user/create/add", status_code=status.HTTP_200_OK)  # Add new user
 def add_new_user(request: schemas.User, db: Session = Depends(get_db)):
     code = generate_code()
     new_data = {
@@ -96,7 +96,7 @@ def add_new_user(request: schemas.User, db: Session = Depends(get_db)):
     return {"detail": "success"}
 
 
-@app.post("/user/create/verify", status_code=status.HTTP_200_OK)
+@app.post("/user/create/verify", status_code=status.HTTP_200_OK)  # Verify new user
 def verify_new_user(request: schemas.User, verification_code: int, db: Session = Depends(get_db)):
     new_user = models.User(
         user_name=request.user_name,
@@ -121,9 +121,8 @@ def verify_new_user(request: schemas.User, verification_code: int, db: Session =
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Incorrect code.")
 
 
-@app.get("/user/login", status_code=status.HTTP_200_OK)
+@app.get("/user/login", status_code=status.HTTP_200_OK)  # Logs in a user
 def user_login(username: str, password: str, db: Session = Depends(get_db)):
-    # users = db.query(models.User).filter_by(user_name=username, password=password).all()
     statement = (
         select(models.User)
         .where(
@@ -154,7 +153,7 @@ def user_login(username: str, password: str, db: Session = Depends(get_db)):
     return access_token
 
 
-@app.post("/user/login/forgot", status_code=status.HTTP_200_OK)
+@app.post("/user/login/forgot", status_code=status.HTTP_200_OK)  # Resets password
 def forgot_password(email_address: str, db: Session = Depends(get_db)):
     new_password = generate_code()
     statement = (
@@ -171,7 +170,7 @@ def forgot_password(email_address: str, db: Session = Depends(get_db)):
     return {"detail": "success"}
 
 
-@app.get("/user/details", status_code=status.HTTP_200_OK)
+@app.get("/user/details", status_code=status.HTTP_200_OK)  # Gets user info
 def get_user_details(token: str, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -189,7 +188,7 @@ def get_user_details(token: str, db: Session = Depends(get_db)):
     return user
 
 
-@app.put("/user/update/details", status_code=status.HTTP_200_OK)
+@app.put("/user/update/details", status_code=status.HTTP_200_OK)  # Updates user details
 def update_details(token: str, user: schemas.UpdatedUser, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -218,7 +217,7 @@ def update_details(token: str, user: schemas.UpdatedUser, db: Session = Depends(
     return {"detail": "success"}
 
 
-@app.put("/user/update/password", status_code=status.HTTP_200_OK)
+@app.put("/user/update/password", status_code=status.HTTP_200_OK)  # Updates user password
 def update_password(token: str, old_password: str, new_password: str, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -256,7 +255,7 @@ def update_password(token: str, old_password: str, new_password: str, db: Sessio
     return {"detail": "success"}
 
 
-@app.put("/user/logout", status_code=status.HTTP_200_OK)
+@app.put("/user/logout", status_code=status.HTTP_200_OK)  # Logs out user
 def logout(token: str, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -275,7 +274,7 @@ def logout(token: str, db: Session = Depends(get_db)):
     return {"detail": "success"}
 
 
-@app.get("/exercises", status_code=status.HTTP_200_OK)
+@app.get("/exercises", status_code=status.HTTP_200_OK)  # Returns list of exercises
 def get_exercises(token: str, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -291,7 +290,7 @@ def get_exercises(token: str, db: Session = Depends(get_db)):
     return exercises
 
 
-@app.post("/workout/plan/add", status_code=status.HTTP_200_OK)
+@app.post("/workout/plan/add", status_code=status.HTTP_200_OK)  # Adds a new workout plan
 def add_workout_plan(token: str, workout_plan: schemas.WorkoutPlan, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -354,7 +353,7 @@ def add_workout_plan(token: str, workout_plan: schemas.WorkoutPlan, db: Session 
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error.")
 
 
-@app.get("/workout-plan", status_code=status.HTTP_200_OK)
+@app.get("/workout-plan", status_code=status.HTTP_200_OK)  # Returns workout plans of user
 def get_workout_plans(token: str, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -373,7 +372,7 @@ def get_workout_plans(token: str, db: Session = Depends(get_db)):
     return workout_plans
 
 
-@app.get("/workout", status_code=status.HTTP_200_OK)
+@app.get("/workout", status_code=status.HTTP_200_OK)  # Get list of workouts in a plan
 def get_workouts(token: str, workout_plan_id: int, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -396,7 +395,7 @@ def get_workouts(token: str, workout_plan_id: int, db: Session = Depends(get_db)
     return workout_plans
 
 
-@app.get("/workout-exercise", status_code=status.HTTP_200_OK)
+@app.get("/workout-exercise", status_code=status.HTTP_200_OK)  # Gets exercises from workout
 def get_workout_exercises(token: str, workout_id: int, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -432,7 +431,7 @@ def get_workout_exercises(token: str, workout_id: int, db: Session = Depends(get
     return workout_exercises
 
 
-@app.put("/workout-plan", status_code=status.HTTP_200_OK)
+@app.put("/workout-plan", status_code=status.HTTP_200_OK)  # Edits workout plan
 def update_workout_plan(token: str, updated_plan: schemas.WorkoutPlan, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -470,7 +469,7 @@ def update_workout_plan(token: str, updated_plan: schemas.WorkoutPlan, db: Sessi
     return {"detail": "success"}
 
 
-@app.put("/workout", status_code=status.HTTP_200_OK)
+@app.put("/workout", status_code=status.HTTP_200_OK)  # Edits workout
 def update_workout(token: str, updated_workout: schemas.Workout, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -508,7 +507,7 @@ def update_workout(token: str, updated_workout: schemas.Workout, db: Session = D
     return {"detail": "success"}
 
 
-@app.delete("/workout-plan", status_code=status.HTTP_200_OK)
+@app.delete("/workout-plan", status_code=status.HTTP_200_OK)  # Deletes plan
 def delete_workout_plan(token: str, plan_to_delete: schemas.WorkoutPlan, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -575,7 +574,7 @@ def delete_workout_plan(token: str, plan_to_delete: schemas.WorkoutPlan, db: Ses
     return {"detail": "success"}
 
 
-@app.delete("/workout-exercise", status_code=status.HTTP_200_OK)
+@app.delete("/workout-exercise", status_code=status.HTTP_200_OK)  # Deletes exercise from workout
 def delete_exercise(token: str, exercise_to_delete: schemas.Exercise, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -643,7 +642,7 @@ def delete_exercise(token: str, exercise_to_delete: schemas.Exercise, db: Sessio
     return {"detail": "success"}
 
 
-@app.delete("/workout", status_code=status.HTTP_200_OK)
+@app.delete("/workout", status_code=status.HTTP_200_OK)  # Deletes workout from plan
 def delete_workout(token: str, workout_to_delete: schemas.Workout, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -724,7 +723,7 @@ def delete_workout(token: str, workout_to_delete: schemas.Workout, db: Session =
     return {"detail": "success"}
 
 
-@app.post("/workout", status_code=status.HTTP_200_OK)
+@app.post("/workout", status_code=status.HTTP_200_OK)  # Create workout
 def add_workout(token: str, workout_plan_id, workout: schemas.Workout, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -761,7 +760,7 @@ def add_workout(token: str, workout_plan_id, workout: schemas.Workout, db: Sessi
     return {"detail": "success"}
 
 
-@app.post("/workout-exercise", status_code=status.HTTP_200_OK)
+@app.post("/workout-exercise", status_code=status.HTTP_200_OK)  # Add exercise
 def add_workout_exercise(token: str, workout_id: int, exercise_id: int, num: int, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -799,7 +798,7 @@ def add_workout_exercise(token: str, workout_id: int, exercise_id: int, num: int
     return {"detail": "success"}
 
 
-@app.post("/workout-exercise-history", status_code=status.HTTP_200_OK)
+@app.post("/workout-exercise-history", status_code=status.HTTP_200_OK)  # Add history
 def add_workout_exercise_history(token: str, workout_exercise_id: int, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")
@@ -839,7 +838,7 @@ def add_workout_exercise_history(token: str, workout_exercise_id: int, db: Sessi
     return {"detail": "success", "exercise_history_id": new_id}
 
 
-@app.post("/set-history", status_code=status.HTTP_200_OK)
+@app.post("/set-history", status_code=status.HTTP_200_OK)  # Add set history
 def add_set_history(
         token: str,
         exercise_history_id: int,
@@ -903,7 +902,7 @@ def add_set_history(
     return {"detail": "success"}
 
 
-@app.get("/set-history", status_code=status.HTTP_200_OK)
+@app.get("/set-history", status_code=status.HTTP_200_OK)  # Returns history
 def get_exercise_history(token: str, exercise_id: int, db: Session = Depends(get_db)):
     if not check_valid_token(db, token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access expired.")

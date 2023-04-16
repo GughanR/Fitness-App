@@ -1,4 +1,4 @@
-# This module is responsible for allowing access to users
+# This module is responsible for managing requests related to account details and checking these details
 import os
 import string
 import requests

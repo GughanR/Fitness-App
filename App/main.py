@@ -1,52 +1,35 @@
-# உ
+# உ This is the main entry point to the client app
+# The classes represent pages / screens used in the program
+# The names of the classes correspond with the class names found in the 'My.kv' file
+
 import datetime
-
-import kivy
-import numpy as np
-
-from kivy.app import App
-from kivy.resources import resource_find
-from kivymd.app import MDApp
-from kivy.uix.label import Label
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.core.window import Window
-from kivy.properties import ObjectProperty, StringProperty, NumericProperty, OptionProperty
-from kivy.lang import Builder
-from kivy.uix.widget import Widget, WidgetBase
-import time
-from kivy.clock import Clock
-from kivy.animation import Animation
-from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition, NoTransition, CardTransition
-from kivy.uix.button import Button
-from kivy.graphics import *
-from kivymd.uix.dialog import MDDialog
-from kivymd.uix.button import MDFlatButton
-from kivymd.uix.textfield import MDTextField
-from kivymd.uix.bottomnavigation.bottomnavigation import MDBottomNavigation, MDBottomNavigationItem
-from kivymd.uix.scrollview import MDScrollView
-from kivymd.uix.refreshlayout import MDScrollViewRefreshLayout
-from kivy.utils import get_color_from_hex, platform
-from kivymd.uix.menu import MDDropdownMenu
-from kivymd.uix.list import OneLineListItem
-import os, sys
-from kivy.resources import resource_add_path, resource_find
-import user
 import json
-import workout
-from kivymd.uix.card.card import MDCardSwipe, MDCardSwipeFrontBox, MDCardSwipeLayerBox, MDSeparator, MDCard
-from kivymd.uix.label import MDLabel
-from kivymd.uix.pickers import MDDatePicker
+
+from kivy.core.window import Window
 from kivy.garden.matplotlib import FigureCanvasKivyAgg
-from matplotlib import pyplot as plt
+from kivy.lang import Builder
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
+from kivymd.app import MDApp
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.card.card import MDCardSwipe, MDSeparator, MDCard
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.label import MDLabel
+from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.pickers import MDDatePicker
+from kivymd.uix.scrollview import MDScrollView
+
+import user
 import view_progress
+import workout
 
 
-class DialogBtn(MDFlatButton):
+class DialogBtn(MDFlatButton):  # Pop up window
     pass
 
 
-class CustomDialog(MDDialog):
+class CustomDialog(MDDialog):  # Customised pop up
 
     def __init__(self, **kwargs):
         self.buttons = [
@@ -56,48 +39,48 @@ class CustomDialog(MDDialog):
         self.open()
 
 
-class WorkoutPlanCard(MDCardSwipe):
+class WorkoutPlanCard(MDCardSwipe):  # Card used to display workout plans
     text = StringProperty()
     image_source = StringProperty()
     workout_plan = ObjectProperty()
 
 
-class WorkoutCard(MDCardSwipe):
+class WorkoutCard(MDCardSwipe):  # Card to display workouts
     text = StringProperty()
     number = StringProperty()
     workout = ObjectProperty()
 
 
-class ExerciseCard(MDCardSwipe):
+class ExerciseCard(MDCardSwipe):  # Card to display exercises
     text = StringProperty()
     image_source = StringProperty()
     exercise = ObjectProperty()
 
 
-class ExerciseCardNormal(MDCard):
+class ExerciseCardNormal(MDCard):  # Card to display exercises when adding a new exercise
     text = StringProperty()
     image_source = StringProperty()
     exercise = ObjectProperty()
 
 
-class CompleteExerciseCard(MDCard):
+class CompleteExerciseCard(MDCard):  # Card to display exercise when workout is being completed
     text = StringProperty()
     image_source = StringProperty()
 
 
-class MuscleGroupButton(MDFlatButton):
+class MuscleGroupButton(MDFlatButton):  # Button to display muscle group when adding new exercise
     text = StringProperty()
 
 
-class Background(FloatLayout):
+class Background(FloatLayout):  # Class to add background image
     pass
 
 
-class InitialScreenDecoration(FloatLayout):
+class InitialScreenDecoration(FloatLayout):  # Class to add some decoration in initial screen
     pass
 
 
-class InitialScreen(Screen):
+class InitialScreen(Screen):  # The initial screen
     pass
 
 
@@ -108,7 +91,7 @@ class LoginScreen(Screen):
     pwInput = ObjectProperty(None)
     dialog = None
 
-    def login(self):
+    def login(self):  # Send login request
         empty = False
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:
@@ -138,7 +121,7 @@ class LoginScreen(Screen):
             except Exception as e:
                 CustomDialog(text="Connection error")
 
-    def reset_inputs(self):
+    def reset_inputs(self):  # Removes inputs
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:
                 widget_object.text = ""
@@ -147,13 +130,13 @@ class LoginScreen(Screen):
 
 class ForgotPasswordScreen(Screen):
 
-    def reset_inputs(self):
+    def reset_inputs(self):  # Removes inputs
         for widget_name, widget_object in self.ids.items():
             if "Input" in widget_name:
                 widget_object.text = ""
                 widget_object.helper_text = ""
 
-    def reset_password(self, email_address):
+    def reset_password(self, email_address):  # Sends request to reset password
         try:
             response = user.reset_password(email_address)
             if response.status_code != 200:
@@ -174,16 +157,13 @@ class SignUpScreen(Screen):
     pwInput = ObjectProperty(None)
     dialog = None
 
-    # verifyDialog = ObjectProperty(None)
-    # codeInput = ObjectProperty(None)
-
-    def create_account(self):
+    def create_account(self):  # Sends request to create a new account
         invalid = False
 
         for widget_name, widget_object in self.ids.items():
-            if "Input" in widget_name:
+            if "Input" in widget_name:  # Checks all input fields
 
-                if "name" in widget_name:
+                if "name" in widget_name:  # Check each one
                     response = user.check_name(widget_object.text)
                 elif "email" in widget_name:
                     response = user.check_email(widget_object.text)
@@ -194,7 +174,7 @@ class SignUpScreen(Screen):
                 else:
                     response = True
 
-                if len(widget_object.text) == 0:
+                if len(widget_object.text) == 0:  # Checks for empty fields
                     invalid = True
                     widget_object.helper_text = widget_object.hint_text + " must not be empty"
                 elif type(response) == str:
@@ -237,7 +217,7 @@ class SignUpScreen(Screen):
                 widget_object.helper_text = ""
 
 
-class VerifyUserScreen(Screen):
+class VerifyUserScreen(Screen):  # Screen to get verification code
     codeInput = ObjectProperty(None)
     fullname = None
     email = None
@@ -253,7 +233,7 @@ class VerifyUserScreen(Screen):
 
     def verify(self):
         self.codeInput.helper_text = ""
-        try:
+        try:  # Send request
             response = user.verify(
                 full_name=self.fullname,
                 email_address=self.email,
@@ -284,8 +264,8 @@ class VerifyUserScreen(Screen):
             )
 
 
-class MainScreen(Screen):
-    def on_pre_enter(self, *args):
+class MainScreen(Screen):  # Main menu screens
+    def on_pre_enter(self, *args):  # Code here will execute as soon as screen is about to show
         # Loads widgets in main menu screens
         # Account Page
         name_text = self.children[0].children[1].screens[2].children[0].nameInput.text
@@ -298,28 +278,19 @@ class MainScreen(Screen):
         if len(cards_on_screen) == 0:  # Only refresh if no cards on screen
             WorkoutPage.refresh(self.children[0].children[1].screens[1].children[0])
 
-        # # View Progress Page
-        # # Load dummy graph
-        # stat_text = self.children[0].children[1].screens[0].children[0].statDropDown.text
-        # if stat_text == "None":
-        #     ViewProgressPage.g(self.children[0].children[1].screens[0].children[0])
 
-
-class AccountPage(MDScrollView):
+class AccountPage(MDScrollView):  # Screen to change account details
     updateBtn = ObjectProperty(None)
     nameInput = ObjectProperty(None)
     emailInput = ObjectProperty(None)
     unInput = ObjectProperty(None)
     weightUnitDropDown = ObjectProperty(None)
-    # pwInput = ObjectProperty(None)
     dialog = None
-    # verifyDialog = ObjectProperty(None)
-    # codeInput = ObjectProperty(None)
     user_details = None
 
     # https://www.youtube.com/watch?v=6oHfaY6p0K0
-    def show_drop_down(self):
-        self.list_items = [
+    def show_drop_down(self):  # Displays drop down
+        self.list_items = [  # Items in drop down
             {
                 "viewclass": "OneLineListItem",
                 "text": "KG",
@@ -339,7 +310,7 @@ class AccountPage(MDScrollView):
         )
         self.drop_down.open()
 
-    def update_weight_unit(self, weight_unit):
+    def update_weight_unit(self, weight_unit):  # Changes text on screen
         self.weightUnitDropDown.text = weight_unit
         self.drop_down.dismiss()
         # Update in server
@@ -366,7 +337,7 @@ class AccountPage(MDScrollView):
     def update_account(self):
         invalid = False
 
-        for widget_name, widget_object in self.ids.items():
+        for widget_name, widget_object in self.ids.items():  # Get inputs
             if "Input" in widget_name:
 
                 if "name" in widget_name:
@@ -389,7 +360,7 @@ class AccountPage(MDScrollView):
 
         if not invalid:
             try:
-                response = user.update_account(
+                response = user.update_account(  # Send request
                     self.nameInput.text,
                     self.emailInput.text,
                     self.unInput.text
@@ -413,7 +384,7 @@ class AccountPage(MDScrollView):
 
     def logout(self):
         try:
-            response = user.logout()
+            response = user.logout()  # Send request to logout
             if response.status_code not in (200, 403):
                 CustomDialog(
                     text="Unable to logout"
@@ -441,14 +412,14 @@ class ChangePasswordScreen(Screen):
     def update_account(self):
         old_pw = self.ids.oldPWInput.text
         new_pw = self.ids.newPWInput.text
-        response = user.check_password(new_pw)
+        response = user.check_password(new_pw)  # Checks password
 
         if type(response) == str:
             self.ids.newPWInput.helper_text = response
             return
 
         try:
-            response = user.update_password(old_pw, new_pw)
+            response = user.update_password(old_pw, new_pw)  # Send request
             if response.status_code != 200:
                 CustomDialog(
                     text=json.loads(response.content.decode("utf-8"))["detail"]
@@ -460,16 +431,16 @@ class ChangePasswordScreen(Screen):
             CustomDialog(text="Connection failed")
 
 
-class WorkoutPage(MDScrollView):
-    def new_workout(self):
+class WorkoutPage(MDScrollView):  # Screen to view workout plans
+    def new_workout(self):  # Opens screen to create workouts
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "create_workout"
 
-    def remove_all_cards(self):
+    def remove_all_cards(self):  # Clears workout plans
         self.ids.workoutsList.clear_widgets()
 
     def refresh(self):
-        # Get Workout
+        # Get workout plans
         try:
             response = workout.get_workout_plans()
         except:
@@ -546,7 +517,7 @@ class WorkoutPage(MDScrollView):
         MDApp.get_running_app().root.current = "view_workouts"
 
 
-class CreateWorkoutScreen(Screen):
+class CreateWorkoutScreen(Screen):  # Screen which creates new workout plan
     goalDropDown = ObjectProperty(None)
     typeDropDown = ObjectProperty(None)
     numOfDaysInput = ObjectProperty(None)
@@ -763,13 +734,13 @@ class ViewWorkoutsScreen(Screen):
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "view_exercises"
 
-    def add_workout(self):
+    def add_workout(self):  # Pass variables to next screen
         MDApp.get_running_app().root.get_screen("add_workout").workout_plan = self.workout_plan
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "add_workout"
 
 
-class ViewExercisesScreen(Screen):
+class ViewExercisesScreen(Screen):  # Screen to view exercises in workout
     workout = workout.Workout()
 
     def on_pre_enter(self, *args):  # Load screen details on screen load
@@ -836,11 +807,11 @@ class ViewExercisesScreen(Screen):
             )
             self.ids.exercisesInWorkoutList.add_widget(card)
 
-    def select_card(self, instance):
+    def select_card(self, instance):  # Empty method to not cause error when button pressed
         pass
 
     def complete_workout(self):
-        # Change screen
+        # Change screen and pass variables
         MDApp.get_running_app().root.get_screen("complete_workout").workout_obj = self.workout
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "complete_workout"
@@ -908,7 +879,7 @@ class EditWorkoutPlanScreen(Screen):
 
 
 class EditWorkoutScreen(Screen):
-    workout = workout.Workout()
+    workout = workout.Workout()  # Workout object
 
     def on_pre_enter(self, *args):
         # Show current details
@@ -940,7 +911,7 @@ class EditWorkoutScreen(Screen):
 
 
 class AddWorkoutScreen(Screen):
-    workout_plan = workout.WorkoutPlan()
+    workout_plan = workout.WorkoutPlan()  # Workout plan object
 
     def add_workout(self):
         # Check workout name
@@ -975,7 +946,7 @@ class AddWorkoutScreen(Screen):
         MDApp.get_running_app().root.current = "view_workouts"
 
 
-class MuscleGroupsScreen(Screen):
+class MuscleGroupsScreen(Screen):  # Screen that shows muscle groups when adding a new exercise to a workout
     def on_pre_enter(self, *args):
         self.clear_screen()
         # Get exercises from server
@@ -1020,7 +991,7 @@ class MuscleGroupsScreen(Screen):
         self.on_pre_enter()
 
 
-class AddExerciseScreen(Screen):
+class AddExerciseScreen(Screen):  # Screen to display exercises from a muscle group
     muscle_group = StringProperty()
 
     def on_pre_enter(self, *args):
@@ -1102,8 +1073,8 @@ class AddExerciseScreen(Screen):
         self.on_pre_enter()
 
 
-class CompleteWorkoutScreen(Screen):
-    workout_obj = workout.Workout()
+class CompleteWorkoutScreen(Screen):  # Screen to complete workout
+    workout_obj = workout.Workout()  # Variables and objects needed in this screen
     exercise_queue = []
     exercise_number = 1
     set_number = 1
@@ -1112,7 +1083,7 @@ class CompleteWorkoutScreen(Screen):
     goal = StringProperty()
     exercise_history = []
 
-    def on_enter(self, *args):
+    def on_enter(self, *args):  #
         # Set title
         self.ids.title.text = self.workout_obj.workout_name
 
@@ -1142,7 +1113,7 @@ class CompleteWorkoutScreen(Screen):
         self.ids.weightUnit.text = user.get_user_details()["unit_weight"]
 
     def on_pre_leave(self, *args):
-        # Reset inputs and variables
+        # Reset inputs and variables when screen exits
         self.output_weight_reps("", "")
         self.set_number = 1
         self.workout_obj = workout.Workout()
@@ -1156,7 +1127,7 @@ class CompleteWorkoutScreen(Screen):
         self.ids.set.text = f"[b]Set {self.set_number}[/b]"
         self.ids.skipBtn.disabled = False
 
-    def show_exercise(self):
+    def show_exercise(self):  # Displays new exercise
         exercise_card = CompleteExerciseCard(
             text=f"{self.exercise_queue[0].exercise_name} ({self.exercise_number}/{len(self.workout_obj.exercise_list)})",
             image_source=f"Images/exercises/{self.exercise_queue[0].exercise_name}.png"
@@ -1166,14 +1137,14 @@ class CompleteWorkoutScreen(Screen):
         # Show new recommended weight and reps
         self.calculate_weight_reps()
 
-    def skip_exercise(self):
+    def skip_exercise(self):  # Skips current exercise and adds to end of queue
         exercise = self.exercise_queue.pop(0)
         self.exercise_queue.append(exercise)
         # Reset set number
         self.set_number = 1
         self.show_exercise()
 
-    def finish_exercise(self):
+    def finish_exercise(self):  # Removes current exercise from queue
         self.exercise_queue.pop(0)
 
         if self.check_workout_complete():
@@ -1190,7 +1161,7 @@ class CompleteWorkoutScreen(Screen):
         self.set_number = 1
         self.ids.set.text = f"[b]Set {self.set_number}[/b]"
 
-    def check_workout_complete(self):
+    def check_workout_complete(self):  # Checks if workout is complete
         if len(self.exercise_queue) == 0:
             return True
         else:
@@ -1277,7 +1248,7 @@ class CompleteWorkoutScreen(Screen):
         # Show new recommended weight and reps
         self.calculate_weight_reps()
 
-    def calculate_weight_reps(self):
+    def calculate_weight_reps(self):  # Recommends weight / reps
         self.get_history()
         exercise_history = self.exercise_history
 
@@ -1316,7 +1287,7 @@ class CompleteWorkoutScreen(Screen):
                 weight = self.last_set.weight_used
         else:
             # Calculate weight using algorithm
-            # Using self.exercise_history because function will convert to KG again
+            # Using 'self.exercise_history' because function will convert to KG again
             weight = workout.calculate_weight(
                 self.exercise_queue[0],
                 self.exercise_history,
@@ -1345,23 +1316,20 @@ class CompleteWorkoutScreen(Screen):
         self.ids.repsInput.text = str(reps)
 
 
-class ViewProgressPage(MDScrollView):
+class ViewProgressPage(MDScrollView):  # Screen to show graph
     statDropDown = ObjectProperty()
     date_range = []
     exercises = []
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     def show_date_picker(self):
-        self.date_dialog = MDDatePicker(
+        self.date_dialog = MDDatePicker(  # Settings for date picker
             mode="range",
             primary_color="#5542ff",
             text_button_color="#5542ff",
             selector_color="#5542ff"
         )
         self.date_dialog.bind(
-            on_save=self.save_date
+            on_save=self.save_date  # Function called when date selected
         )
         self.date_dialog.open()
 
@@ -1431,13 +1399,6 @@ class ViewProgressPage(MDScrollView):
         except IndexError:
             CustomDialog(text="Invalid date range")
 
-
-
-
-
-
-
-
     def save_date(self, instance, value, date_range):
         try:
             # Output selected date
@@ -1496,16 +1457,16 @@ class ViewProgressPage(MDScrollView):
 
 
 class FitnessApp(MDApp):
-    Builder.load_file("My.kv")  # Load kivy file into main.py
+    Builder.load_file("My.kv")  # Load kivy file ('My.kv') into 'main.py'
 
-    x = 783
+    x = 500  # Set size of screen
     # Following window options for debugging
     # It does not change anything when running on mobile
     Window.size = (x, x / 9 * 16)
-    Window.top = 0
-    Window.left = 0
-    Window.borderless = True
-    Window.softinput_mode = "below_target"
+    Window.top = 50
+    Window.left = 50
+    Window.borderless = False
+    Window.softinput_mode = "pan"
     MDApp.title = "Fitness App"
     # Set font sizes
     font_size_coefficient = Window.size[0] / 500
@@ -1525,7 +1486,7 @@ class FitnessApp(MDApp):
         self.theme_cls.accent_palette = "DeepPurple"
         self.theme_cls.material_style = "M3"
         self.theme_cls.theme_style = "Light"
-        sm = ScreenManager(transition=SlideTransition())
+        sm = ScreenManager(transition=SlideTransition())  # Manages what screens are shown
         sm.add_widget(InitialScreen(name="initial"))
         sm.add_widget(SignUpScreen(name="signup"))
         sm.add_widget(LoginScreen(name="login"))
@@ -1542,13 +1503,10 @@ class FitnessApp(MDApp):
         sm.add_widget(MuscleGroupsScreen(name="muscle_groups"))
         sm.add_widget(AddExerciseScreen(name="add_exercise"))
         sm.add_widget(CompleteWorkoutScreen(name="complete_workout"))
-        # sm.current = "main"
 
         # Check if sign in required
         if user.check_access_token():
             sm.current = "main"
-        # sm.current = "main"  # DEBUG
-        # sm.screens[5].children[0].children[1].current = "Account"  # DEBUG
         return sm
 
 

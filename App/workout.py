@@ -3,7 +3,7 @@ from endpoints import Url
 import requests
 import json
 import string
-from user import get_access_token, get_user_details
+from user import get_access_token
 
 
 class WorkoutPlan:
@@ -81,12 +81,12 @@ def convert_to_json(py_obj):
     return json_data
 
 
-def convert_exercise(exercise_json):
+def convert_exercise(exercise_json):  # Converts json to py objects
     exercise_obj = Exercise(exercise_json)
     return exercise_obj
 
 
-def convert_workout(workout_json):
+def convert_workout(workout_json):  # Converts json to py objects
     exercise_list = workout_json.get("exercise_list")
     exercise_obj_list = []
     # If exercise list exists then convert each exercise to object
@@ -104,7 +104,7 @@ def convert_workout(workout_json):
     return workout_obj
 
 
-def convert_workout_plan(workout_plan_json):
+def convert_workout_plan(workout_plan_json):  # Converts json to py objects
     workout_list = workout_plan_json.get("exercise_list")
     workout_obj_list = []
     # If exercise list exists then convert each exercise to object
@@ -122,7 +122,7 @@ def convert_workout_plan(workout_plan_json):
     return workout_plan_obj
 
 
-def convert_exercise_history(exercise_history_list):
+def convert_exercise_history(exercise_history_list):  # Converts json to py objects
     obj_list = []
     for json_obj in exercise_history_list:
         obj_list.append(ExerciseHistory(json_obj))
@@ -283,7 +283,7 @@ def create_workout_plan(plan_goal, muscles_chosen, plan_type, plan_name, num_of_
                 exercise_queue = muscle_subgroup_queue.pop(0)
                 exercise = exercise_queue.pop(0)
                 # Only add exercise if it is not already there
-                if exercise not in selected_exercises:  # TODO: ERROR fixed
+                if exercise not in selected_exercises:
                     selected_exercises.append(exercise)
                 # Enqueue again
                 exercise_queue.append(exercise)
@@ -435,7 +435,7 @@ def add_workout_exercise(new_workout_exercise, workout_id):
     return response
 
 
-def check_weight_input(weight):
+def check_weight_input(weight):  # Checks that weight is valid
     try:
         weight = float(weight)
         return (weight > 0) and (weight <= 1000)
@@ -443,7 +443,7 @@ def check_weight_input(weight):
         return False
 
 
-def check_reps_input(reps):
+def check_reps_input(reps):  # Checks reps are valid
     try:
         reps = int(reps)
         return (reps > 0) and (reps <= 150)
@@ -529,7 +529,7 @@ def linear_regression(x_values, y_values, given_x):
 
         # Estimate
         y_est = a + given_x * b
-    except ZeroDivisionError:
+    except ZeroDivisionError:  # Return 0
         y_est = 0
 
     return y_est
@@ -609,25 +609,3 @@ def calculate_reps(exercise, exercise_history, current_set, weight, last_set, go
         new_reps = last_set.reps_completed
 
     return new_reps
-
-
-if __name__ == "__main__":
-    response = get_exercise_history(31)
-    l = json.loads(response.content.decode("utf-8"))
-    l = convert_exercise_history(l)
-    e = Exercise()
-    e.min_reps = 2
-    e.max_reps = 10
-    h = ExerciseHistory()
-    h.reps_completed=9
-    h.weight_used=20
-
-    print(calculate_weight(e, l, 1, h, "size"))
-    print(calculate_reps(e, l, 2, 5, h, "size"))
-
-
-    linear_regression(
-        [1, 2, 5, 7, 8, 9, 10],
-        [7, 9, 13, 15, 14, 17, 20],
-        2
-    )

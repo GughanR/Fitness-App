@@ -1,3 +1,5 @@
+#  This file defines the look of the app
+
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 #:import resource_find kivy.resources
 #:import MDTextField1 kivy_modified.textfield
@@ -9,10 +11,6 @@
 
 #:set tInpSize [0.8, 0.07]
 #:set tInpX (1-tInpSize[0])/2
-
-###############
-
-###############
 
 <MDLabel>:
     color: 0,0,0,1
@@ -114,15 +112,10 @@
         Background
         InitialScreenDecoration
 
-        Image:
-            source: "Images/dumbbell.png"
-            pos_hint: {"x": 0.2, "y": 0.7 }
-            size_hint: 0.6, 0.1
-            allow_stretch: True
         MDLabel:
             pos_hint: {"x": 0.05, "y": 0.55 }
             size_hint: 0.9, 0.2
-            text: "AI FITNESS"
+            text: "FITNESS APP"
             halign: "center"
             font_size: app.fs_title
             color: 0,0,0,1
@@ -492,9 +485,8 @@
             text: "Change Password"
             font_size: app.fs_normal
             md_bg_color: 0,0,0,1
-            on_release: 
-                # Kivy is a frustrating language
-                # Need to traverse back 4 times to change screen
+            on_release:
+                # Change screen
                 # AccountPage --> MDBottomNavigationItem --> ScreenManager 
                 # --> MDBottomNavigationItem --> MainScreen
                 root.parent.parent.parent.parent.manager.transition.direction = "left"
@@ -1362,12 +1354,3 @@
                     pos_hint: {"y": 0.2}
                     font_size: app.fs_normal
                     on_release: root.show_date_picker()
-
-
-
-
-
-
-
-
-
