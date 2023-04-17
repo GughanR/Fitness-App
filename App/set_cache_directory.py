@@ -1,7 +1,7 @@
 from kivy.utils import platform
 from kivymd.app import MDApp
 import os.path
-# Borrowed from https://stackoverflow.com/questions/52981411/cant-write-file-on-ios-using-kivy-in-python
+# Borrowed Code, See Reference ID:6
 # Needed for iOS devices
 # This is due to the fact that iOS won't allow write access to files not
 # in root directory

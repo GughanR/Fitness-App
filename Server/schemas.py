@@ -4,7 +4,7 @@ from typing import Optional, List
 import datetime
 
 
-class StrictBaseModel(BaseModel):  # https://github.com/tiangolo/fastapi/issues/269
+class StrictBaseModel(BaseModel):  # Borrowed Code, See Reference ID:1
     class Config:
         extra = "forbid"
 
@@ -43,7 +43,7 @@ class Exercise(BaseModel):
     completed: Optional[bool]
     workout_exercise_number: int
 
-    # https://stackoverflow.com/questions/73282141/python-pydantic-model-passing-none-as-int-value-is-not-a-valid-integer-type-typ
+    # Borrowed Code, See Reference ID:2
     # Allows none values in "Optional" fields
     @validator('workout_exercise_id', 'completed', pre=True)
     def allow_none(cls, v):

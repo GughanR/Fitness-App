@@ -1,4 +1,3 @@
-import user
 from endpoints import Url
 import requests
 import json

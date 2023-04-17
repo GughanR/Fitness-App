@@ -1,14 +1,10 @@
-import datetime
-import json
 import matplotlib.dates
 from matplotlib import pyplot as plt
 import workout
-import random
 
 
 def plot_graph(x_data, y_data, date_range):
     # Get start and end date
-    # date_range = matplotlib.dates.date2num(date_range)
     plt.clf()
     start = date_range[0]
     end = date_range[-1]

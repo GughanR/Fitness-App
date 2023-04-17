@@ -288,7 +288,7 @@ class AccountPage(MDScrollView):  # Screen to change account details
     dialog = None
     user_details = None
 
-    # https://www.youtube.com/watch?v=6oHfaY6p0K0
+    # Borrowed Code, See Reference ID:3
     def show_drop_down(self):  # Displays drop down
         self.list_items = [  # Items in drop down
             {
@@ -511,7 +511,7 @@ class WorkoutPage(MDScrollView):  # Screen to view workout plans
         # Save list in workout plan
         instance.workout_plan.workout_list = converted_list
         # If no error, then open workout plan
-        # https://stackoverflow.com/questions/30253745/python-for-kivypass-values-between-multiple-screens
+        # Borrowed Code, See Reference ID:4
         MDApp.get_running_app().root.get_screen("view_workouts").workout_plan = instance.workout_plan
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "view_workouts"
@@ -729,7 +729,6 @@ class ViewWorkoutsScreen(Screen):
         # Save list in workout
         instance.workout.exercise_list = converted_list
         # If no error, then open workout
-        # https://stackoverflow.com/questions/30253745/python-for-kivypass-values-between-multiple-screens
         MDApp.get_running_app().root.get_screen("view_exercises").workout = instance.workout
         MDApp.get_running_app().root.transition.direction = "left"
         MDApp.get_running_app().root.current = "view_exercises"
@@ -1009,7 +1008,7 @@ class AddExerciseScreen(Screen):  # Screen to display exercises from a muscle gr
         exercises_json = json.loads(response.content.decode("utf-8"))
         exercises = workout.load_exercises(exercises_json)
 
-        # https://www.pythontutorial.net/python-basics/python-filter-list/
+        # Borrowed Code, See Reference ID:5
         muscle_group_exercises = filter(lambda e: e.muscle_group == self.muscle_group.lower(), exercises)
 
         # Get distinct muscle sub groups
@@ -1083,7 +1082,7 @@ class CompleteWorkoutScreen(Screen):  # Screen to complete workout
     goal = StringProperty()
     exercise_history = []
 
-    def on_enter(self, *args):  #
+    def on_enter(self, *args):
         # Set title
         self.ids.title.text = self.workout_obj.workout_name
 
