@@ -7,25 +7,9 @@ The server script is located in the Server folder.
 
 ### Install the following packages using command prompt:
 ```   
-pip install "kivy[full]" kivy_garden
-
-pip install kivymd
-
-pip install kivy_garden
-
-pip install requests
-
-pip install matplotlib
+pip install "kivy[full]" kivy_garden kivymd requests matplotlib sqlalchemy fastapi "uvicorn[standard]" pydantic
 
 garden install matplotlib
-
-pip install sqlalchemy
-
-pip install fastapi
-
-pip install "uvicorn[standard]"
-
-pip install pydantic
 ```
 
 ## To set up the server:
